@@ -43,7 +43,9 @@ is the reference implementation until the port is done. Read it, don't guess:
    and the same parse as `hl` on every local real dump; a 4.6 GB dump of 46M
    objects parses in 3.7 s at a peak of 964 MiB, 22 bytes an object
    (`cargo run --release --example measure -- parse <dump>`).
-3. Port the CLI-only models and the command. The command may be better than `hl`:
+3. Port the CLI-only models and the command. **The models are done**
+   (`model/`, over `Profile`): shaped as `report.mjs` shapes them, they give
+   the fixtures' baseline JSON, and `hl`'s on every local real dump. The command may be better than `hl`:
    the baseline is there to compare with, not to copy.
 4. Build the wasm package, run it in the web app, and delete the JS parser and the
    CLI-only modules from heap-landscape. The repositories split for good here.

@@ -16,6 +16,8 @@ mod metadata;
 mod tags;
 mod walk;
 
+pub(crate) use tags::ROOT_NAMES;
+
 use std::fmt;
 use std::io::{self, Read, Seek};
 

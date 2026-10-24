@@ -10,7 +10,12 @@
 //! JHEAP_REAL_DUMPS=/path/to/dumps cargo test --release -p jheap --test real_dumps -- --ignored --nocapture
 //! ```
 //!
-//! Nothing it reads or prints is committed: a parse names the application's
+//! A second test runs the models on each dump and compares their output with
+//! what `hl --json` prints for the report, `peaks` and `leaks`, and for a
+//! `diff` of the two smallest dumps; it needs node, and heap-landscape beside
+//! this checkout or named by `HEAP_LANDSCAPE`.
+//!
+//! Nothing they read or print is committed: a parse names the application's
 //! classes.
 
 mod support;
@@ -91,6 +96,143 @@ fn paths_of(doc: &Value) -> HashMap<Vec<String>, (u64, u64)> {
     paths
 }
 
+/// Parses a dump, a gzipped one (whatever its name says) unzipped aside
+/// first, as hl does: the time given is the parse's only.
+fn parse_dump(dump: &Path, pointers: Option<jheap::Pointers>) -> (Result<jheap::Parse, jheap::Error>, f64) {
+    let mut magic = [0u8; 2];
+    std::io::Read::read_exact(&mut File::open(dump).unwrap(), &mut magic).unwrap();
+    let unzipped = (magic == [0x1f, 0x8b]).then(|| {
+        let aside = std::env::temp_dir().join(format!("jheap-test-{}.hprof", std::process::id()));
+        let mut gz = flate2::read::MultiGzDecoder::new(std::io::BufReader::new(File::open(dump).unwrap()));
+        std::io::copy(&mut gz, &mut File::create(&aside).unwrap()).unwrap();
+        aside
+    });
+    let source = unzipped.as_deref().unwrap_or(dump);
+    let options = Options { pointers, name: dump.display().to_string(), ..Options::default() };
+    let start = Instant::now();
+    let result = parse(File::open(source).unwrap(), &options, &mut |_, _| {});
+    let seconds = start.elapsed().as_secs_f64();
+    if let Some(aside) = &unzipped {
+        fs::remove_file(aside).ok();
+    }
+    (result, seconds)
+}
+
+/// The dumps under `JHEAP_REAL_DUMPS`, the smallest first.
+fn real_dumps() -> Vec<PathBuf> {
+    let mut dumps = Vec::new();
+    if let Some(dirs) = std::env::var_os("JHEAP_REAL_DUMPS") {
+        for dir in std::env::split_paths(&dirs) {
+            dumps_under(&dir, &mut dumps);
+        }
+    }
+    dumps.sort_by_key(|d| fs::metadata(d).map(|m| m.len()).unwrap_or(0));
+    dumps
+}
+
+/// What `hl` prints as JSON for these arguments, read fresh and kept nowhere.
+fn hl(args: &[&std::ffi::OsStr]) -> Result<String, String> {
+    let landscape = std::env::var_os("HEAP_LANDSCAPE")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../heap-landscape"));
+    let out = std::process::Command::new("node")
+        .arg(landscape.join("tools/report.mjs"))
+        .args(args)
+        .args(["--json", "--fresh", "--no-keep"])
+        .output()
+        .map_err(|e| format!("node: {e}"))?;
+    if out.stdout.is_empty() {
+        return Err(String::from_utf8_lossy(&out.stderr).into_owned());
+    }
+    Ok(String::from_utf8_lossy(&out.stdout).into_owned())
+}
+
+/// Where two documents first differ, for a message that is not two pages long.
+fn first_difference(path: &str, got: &Value, want: &Value) -> Option<String> {
+    match (got, want) {
+        (Value::Object(a), Value::Object(b)) => {
+            for (k, v) in b {
+                let at = format!("{path}.{k}");
+                match a.get(k) {
+                    Some(g) => {
+                        if let Some(d) = first_difference(&at, g, v) {
+                            return Some(d);
+                        }
+                    }
+                    None => return Some(format!("{at}: missing")),
+                }
+            }
+            a.keys().find(|k| !b.contains_key(*k)).map(|k| format!("{path}.{k}: not expected"))
+        }
+        (Value::Array(a), Value::Array(b)) => {
+            for (i, (g, v)) in a.iter().zip(b).enumerate() {
+                if let Some(d) = first_difference(&format!("{path}[{i}]"), g, v) {
+                    return Some(d);
+                }
+            }
+            (a.len() != b.len()).then(|| format!("{path}: {} items, {} expected", a.len(), b.len()))
+        }
+        _ => (got != want).then(|| format!("{path}: {got}, {want} expected")),
+    }
+}
+
+#[test]
+#[ignore = "reads the dumps of JHEAP_REAL_DUMPS, which are local, and runs hl"]
+fn models_on_real_dumps_as_heap_landscape_did() {
+    use support::hl::{diff, leaks, normalize, of_hl, peaks, report};
+
+    let dumps = real_dumps();
+    let mut failures = Vec::new();
+    let mut profiles = Vec::new();
+    for dump in &dumps {
+        let (result, _) = parse_dump(dump, None);
+        let p = match result {
+            Ok(parsed) => jheap::Profile::from_parse(&parsed),
+            Err(e) => {
+                failures.push(format!("{}: {e}", dump.display()));
+                continue;
+            }
+        };
+        let name = dump.file_name().unwrap().to_string_lossy().into_owned();
+        type Shape = fn(&jheap::Profile) -> Value;
+        let shaped: [(&str, Shape); 3] = [("", report), ("peaks", peaks), ("leaks", leaks)];
+        for (command, shape) in shaped {
+            let mut args: Vec<&std::ffi::OsStr> = Vec::new();
+            if !command.is_empty() {
+                args.push(command.as_ref());
+            }
+            args.push(dump.as_os_str());
+            let verdict = match hl(&args) {
+                Err(e) => format!("hl failed: {e}"),
+                Ok(text) => match first_difference("", &normalize(shape(&p)), &of_hl(&text)) {
+                    None => "same".to_string(),
+                    Some(d) => {
+                        failures.push(format!("{name} {command}: {d}"));
+                        "DIFFERS".to_string()
+                    }
+                },
+            };
+            println!("{name} {}: {verdict}", if command.is_empty() { "report" } else { command });
+        }
+        profiles.push((dump.clone(), p));
+    }
+    // two dumps, the smallest: of one process or not, the diff has to agree
+    if let [(a, first), (b, second), ..] = profiles.as_slice() {
+        let verdict = match hl(&["diff".as_ref(), a.as_os_str(), b.as_os_str()]) {
+            Err(e) => format!("hl failed: {e}"),
+            Ok(text) => match first_difference("", &normalize(diff(first, second)), &of_hl(&text)) {
+                None => "same".to_string(),
+                Some(d) => {
+                    failures.push(format!("diff: {d}"));
+                    "DIFFERS".to_string()
+                }
+            },
+        };
+        println!("diff of the two smallest: {verdict}");
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+}
+
 fn mib(bytes: u64) -> f64 {
     bytes as f64 / (1u64 << 20) as f64
 }
@@ -98,17 +240,12 @@ fn mib(bytes: u64) -> f64 {
 #[test]
 #[ignore = "reads the dumps of JHEAP_REAL_DUMPS, which are local"]
 fn parses_real_dumps_as_heap_landscape_did() {
-    let Some(dirs) = std::env::var_os("JHEAP_REAL_DUMPS") else {
-        eprintln!("JHEAP_REAL_DUMPS names no directory: nothing to compare");
-        return;
-    };
-    let mut dumps = Vec::new();
-    for dir in std::env::split_paths(&dirs) {
-        dumps_under(&dir, &mut dumps);
-    }
     // the smallest first: the peak is the process's, so each dump's is the
     // largest yet
-    dumps.sort_by_key(|d| fs::metadata(d).map(|m| m.len()).unwrap_or(0));
+    let dumps = real_dumps();
+    if dumps.is_empty() {
+        eprintln!("JHEAP_REAL_DUMPS names no directory with dumps: nothing to compare");
+    }
 
     let mut failures = Vec::new();
     let mut compared = 0;
@@ -118,17 +255,6 @@ fn parses_real_dumps_as_heap_landscape_did() {
             eprintln!("{}: no .hl.json beside it, skipped", dump.display());
             continue;
         }
-        // a gzipped dump, whatever its name says, is unzipped aside first, as
-        // hl does: its parse time is the parse's only
-        let mut magic = [0u8; 2];
-        std::io::Read::read_exact(&mut File::open(dump).unwrap(), &mut magic).unwrap();
-        let unzipped = (magic == [0x1f, 0x8b]).then(|| {
-            let aside = std::env::temp_dir().join(format!("jheap-test-{}.hprof", std::process::id()));
-            let mut gz = flate2::read::MultiGzDecoder::new(std::io::BufReader::new(File::open(dump).unwrap()));
-            std::io::copy(&mut gz, &mut File::create(&aside).unwrap()).unwrap();
-            aside
-        });
-        let source = unzipped.as_deref().unwrap_or(dump);
         let doc: Value = serde_json::from_str(&fs::read_to_string(&kept).unwrap()).unwrap();
         let theirs = &doc["heap"]["report"];
         let pointers = match doc["heap"]["key"]["oops"].as_str() {
@@ -136,13 +262,8 @@ fn parses_real_dumps_as_heap_landscape_did() {
             Some("wide") => Some(jheap::Pointers::Wide),
             _ => None,
         };
-        let options = Options { pointers, name: dump.display().to_string(), ..Options::default() };
 
-        let start = Instant::now();
-        let result = parse(File::open(source).unwrap(), &options, &mut |_, _| {});
-        if let Some(aside) = &unzipped {
-            fs::remove_file(aside).ok();
-        }
+        let (result, seconds) = parse_dump(dump, pointers);
         let parsed = match result {
             Ok(p) => p,
             Err(e) => {
@@ -150,7 +271,6 @@ fn parses_real_dumps_as_heap_landscape_did() {
                 continue;
             }
         };
-        let seconds = start.elapsed().as_secs_f64();
         let (_, peak) = support::memory::peak();
         compared += 1;
 

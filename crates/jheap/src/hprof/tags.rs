@@ -64,6 +64,12 @@ pub(crate) fn type_size(t: u8) -> u64 {
     }
 }
 
+/// The names roots have in a path, and the name of a root of another type.
+pub(crate) const ROOT_NAMES: [&str; 10] = [
+    "Unknown", "JNI Global", "JNI Local", "Java Frame", "Native Stack", "System Class",
+    "Thread Block", "Monitor", "Thread", "GC Root",
+];
+
 /// How a root is named in a path: its first frame.
 pub(crate) fn root_name(t: u8) -> Option<&'static str> {
     Some(match t {

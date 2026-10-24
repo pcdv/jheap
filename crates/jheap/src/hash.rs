@@ -1,7 +1,7 @@
 //! A hasher for the maps keyed by ids and indices, which the default SipHash
 //! makes several times slower than they need to be.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::hash::{BuildHasherDefault, Hasher};
 
 /// rustc-hash's: a multiply per word. Ids are addresses aligned on 8, so the
@@ -58,3 +58,4 @@ impl Hasher for FxHasher {
 }
 
 pub(crate) type FxHashMap<K, V> = HashMap<K, V, BuildHasherDefault<FxHasher>>;
+pub(crate) type FxHashSet<K> = HashSet<K, BuildHasherDefault<FxHasher>>;
