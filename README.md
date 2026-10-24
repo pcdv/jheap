@@ -162,12 +162,30 @@ The exit code tells an answer from none:
 | 3 | found nothing: no leak suspect, nothing grew, no class of the name traced |
 | 4 | the name traced is several classes': they are listed, to name one more fully |
 
+## Installing
+
+A release has an archive per platform, with its checksum: Linux (x86-64 and
+arm64, built against musl, so no libc to match on the server the dump is on),
+macOS (both) and Windows (both). Unpack it and put `jheap` on the path.
+
+```sh
+# Windows, with scoop: the latest, and `scoop update jheap` follows
+scoop install https://github.com/pcdv/jheap/releases/latest/download/jheap.json
+
+# any platform with a Rust toolchain
+cargo install --git https://github.com/pcdv/jheap jheap-cli
+```
+
 ## Building
 
 ```sh
 cargo install --path crates/jheap-cli    # jheap on the path
 cargo test                               # the fixtures' tests
 ```
+
+A release is a tag: `git tag v0.1.0 && git push origin v0.1.0` builds the six
+archives and the scoop manifest (`.github/workflows/release.yml`), and refuses a
+tag that is not the version in `Cargo.toml`.
 
 Work in progress: a Rust rewrite of heap-landscape's parser and `hl` command, and
 now the parser of its web app. See [CLAUDE.md](CLAUDE.md) for the plan.
