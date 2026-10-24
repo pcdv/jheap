@@ -92,6 +92,8 @@ name = "jheap-wasm"
 version = "0.1.0"
 dependencies = [
  "jheap",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

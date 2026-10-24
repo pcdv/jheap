@@ -8,3 +8,9 @@ edition = "2024"
 rust-version = "1.99"
 license = "Apache-2.0"
 repository = "https://github.com/pcdv/jheap"
+
+# One unit, optimized across crates: the parse's loops cross from the binary
+# into the library, and the WebAssembly module is smaller
+[profile.release]
+lto = true
+codegen-units = 1

@@ -51,6 +51,13 @@ is the reference implementation until the port is done. Read it, don't guess:
    the baseline is there to compare with, not to copy.
 4. Build the wasm package, run it in the web app, and delete the JS parser and the
    CLI-only modules from heap-landscape. The repositories split for good here.
+   **The page parses with jheap** (`crates/jheap-wasm`, no wasm-bindgen: a few
+   plain exports, wrapped by heap-landscape's `web/js/hprof/jheap.js`, run in a
+   Web Worker that reads the `File` through `FileReaderSync`), and opens a
+   `.jheap.json`. A 4.6 GB dump opens in 18 s there, against 4 s natively: the
+   reads through `FileReaderSync` are most of the difference. heap-landscape's
+   parse tests run against both parsers. Left: deleting the JS parser, `hl` and
+   its models, which the user's heap-dump-analysis skill still calls.
 
 Later: a dominator tree (heap-landscape's holder tree is a breadth-first spanning
 tree, see its PLAN.md), threads for the first pass, memory-mapped reads.
@@ -112,6 +119,9 @@ dumps unzipped aside first, and prints the time beside the JS version's.
 ## Working here
 
 - `cargo test` runs everything; the fixtures' tests read `fixtures/`.
+- `node crates/jheap-wasm/install.mjs` builds the WebAssembly module and copies
+  it into heap-landscape beside this checkout, where it is committed: the page
+  has no build step. Run heap-landscape's `npm test` after, which parses with it.
 - Regenerate the fixtures with `node fixtures/generate/record.js`, which needs
   heap-landscape beside this checkout (or `HEAP_LANDSCAPE=<path>`) and Node 21+.
   Only while the JS implementation is the reference.
