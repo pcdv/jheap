@@ -1,0 +1,92 @@
+# jheap
+
+Reads JVM heap dumps (`.hprof`, `.hprof.gz`) and says what holds the memory. Two
+consumers:
+
+- **an agent or a person at a terminal**, through the `jheap` command: a single
+  native binary, no runtime to install, meant to run on the server next to the dump;
+- **a person in a browser**, through heap-landscape's web app, which draws the heap
+  as a landscape and gets its parse from jheap compiled to WebAssembly.
+
+## Where this comes from
+
+jheap is the Rust rewrite of the analysis half of
+[heap-landscape](../heap-landscape): its parser and its `hl` command. That checkout
+is the reference implementation until the port is done. Read it, don't guess:
+
+| What | In heap-landscape |
+|---|---|
+| Parser: streaming cursor, object store, walk from the roots | `web/js/hprof/parser.js`, `constants.js` |
+| From the parse to a profile (paths → bytes, objects) | `web/js/load.js` |
+| Profile JSON, jfr-web's version 4 | `web/js/profile/profile.js`, `encode.js` |
+| Ownership chains, the holders of an object | `web/js/model/ownership.js` |
+| CLI-only analyses: retainers, leaks, diff | `web/js/model/retainers.js`, `leaks.js`, `diff.js` |
+| The command, kept parses, exit codes | `tools/report.mjs` |
+| Design notes, limits, measurements | `PLAN.md`, `README.md` |
+
+## Crates
+
+- `crates/jheap`: the library. Parser, object store, profile, models. No I/O beyond
+  `Read + Seek`, so it builds for wasm32 unchanged.
+- `crates/jheap-cli`: the `jheap` binary.
+- `crates/jheap-wasm`: the web app's entry point. Parses a dropped file in a Web
+  Worker (synchronous reads of the `File`, behind `Read + Seek`) and hands back the
+  profile, which is small: 1.8 MB for a 4.6 GB dump. The object graph never crosses
+  into JavaScript. `ownership` is exported too, so the page and the CLI name the
+  same holders.
+
+## Plan
+
+1. **Done.** Reference set: test dumps and what the JS implementation makes of
+   them, in `fixtures/` (see its README).
+2. Port the parser until it gives the expected parses.
+3. Port the CLI-only models and the command. The command may be better than `hl`:
+   the baseline is there to compare with, not to copy.
+4. Build the wasm package, run it in the web app, and delete the JS parser and the
+   CLI-only modules from heap-landscape. The repositories split for good here.
+
+Later: a dominator tree (heap-landscape's holder tree is a breadth-first spanning
+tree, see its PLAN.md), threads for the first pass, memory-mapped reads.
+
+## What must not change, and what may
+
+- **The parse** (`fixtures/expected/*.parse.json`): every path from a root with its
+  bytes and objects, the counts of the report. The web app draws exactly that. A
+  deliberate improvement (e.g. the walk's depth limit of 30, which leaves the end of
+  a long chain without its root) changes the expected file in the same commit and
+  says why in the message.
+- **The profile document**: jfr-web's version 4 JSON plus `samples.objects` and a
+  `heap` object (`key`, `report`), as `tools/report.mjs` writes it. heap-landscape
+  and jfr-web read it. The parse kept beside a dump is named `<name>.jheap.json`.
+- **Exit codes**, which agents rely on: 0 found, 1 broke, 2 called wrong, 3 found
+  nothing, 4 a traced name matches several classes.
+- **Everything else in the command's output may improve**: wording, layout, JSON
+  shape (version it), flags.
+
+## Constraints
+
+- A dump is never held whole in memory: it is read through a window, and only the
+  object graph is kept. Memory grows with the number of objects, not the file size.
+  The JS version needs about 55 bytes an object (a 4.6 GB dump of 46M objects peaks
+  at 2.5 GiB, in 13 s); do better, and measure it.
+- wasm32 addresses 4 GiB: the browser handles up to roughly 100M objects. Beyond,
+  the CLI parses and the page opens its `.jheap.json`.
+- References' width is guessed from the heap's span (compressed under 32 GB, wide
+  above), `--oops` overrides. Object sizes are aligned to 8.
+
+## Inspiration and prior art
+
+- ripgrep, fd: the plain command does the useful thing, colour on a terminal and
+  plain text in a pipe, `--json` for machines, published benchmarks, a library
+  crate under a thin binary, release binaries plus `cargo install` and scoop.
+- [hprof-slurp](https://github.com/agourlay/hprof-slurp): a fast Rust hprof
+  analyser, multithreaded. The speed to beat; it has no ownership, leaks or diff.
+- `jvm-hprof` on crates.io: a parser crate, 0.1.0. Worth reading, not depending on.
+
+## Working here
+
+- `cargo test` runs everything; the fixtures' tests read `fixtures/`.
+- Regenerate the fixtures with `node fixtures/generate/record.js`, which needs
+  heap-landscape beside this checkout (or `HEAP_LANDSCAPE=<path>`) and Node 21+.
+  Only while the JS implementation is the reference.
+- Comments say why, in full sentences, as in heap-landscape's code.

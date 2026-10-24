@@ -1,0 +1,145 @@
+{
+  "dump": {
+    "file": "server-after.hprof",
+    "kept": null,
+    "counted": true,
+    "total": 633536,
+    "format": "JAVA PROFILE 1.0.2",
+    "idSize": 8,
+    "fileSize": 647867,
+    "pointers": "compressed",
+    "pointersGuessed": true,
+    "parseTimeMs": 5,
+    "objects": 949,
+    "classes": 13,
+    "roots": {
+      "System Class": 1,
+      "Java Frame": 2,
+      "Unknown": 1
+    },
+    "unreachable": 13120
+  },
+  "share": 0.1,
+  "verdict": "could-grow",
+  "suspects": [
+    {
+      "rank": 1,
+      "kind": "one",
+      "verdict": "collection",
+      "name": "com.example.Registry",
+      "total": 538264,
+      "share": 0.8496,
+      "objects": 812,
+      "at": 1,
+      "statics": false,
+      "gathered": {
+        "name": "com.example.Session",
+        "objects": 400,
+        "there": 400,
+        "total": 536624,
+        "through": [
+          "java.lang.Object[]"
+        ],
+        "containers": {
+          "name": "java.lang.Object[]",
+          "objects": 1
+        }
+      },
+      "includes": [
+        {
+          "name": "com.example.Session",
+          "objects": 400,
+          "all": 400,
+          "total": 536624
+        }
+      ],
+      "madeOf": [
+        {
+          "name": "byte[]",
+          "bytes": 526904,
+          "objects": 405
+        },
+        {
+          "name": "com.example.Session",
+          "bytes": 9600,
+          "objects": 400
+        },
+        {
+          "name": "java.lang.Object[]",
+          "bytes": 1624,
+          "objects": 1
+        },
+        {
+          "name": "java.lang.String",
+          "bytes": 120,
+          "objects": 5
+        },
+        {
+          "name": "com.example.Registry",
+          "bytes": 16,
+          "objects": 1
+        }
+      ],
+      "holders": [
+        {
+          "total": 538312,
+          "share": 0.8497,
+          "classes": [
+            "com.example.Server"
+          ],
+          "root": false
+        },
+        {
+          "total": 551792,
+          "share": 0.871,
+          "classes": [
+            "Java Frame"
+          ],
+          "root": true,
+          "lives": "from a thread's stack: as long as the thread holds it, unless something the walk did not show holds it too"
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "kind": "one",
+      "verdict": "large",
+      "name": "byte[]",
+      "total": 65552,
+      "share": 0.1035,
+      "objects": 1,
+      "at": 1,
+      "statics": false,
+      "gathered": null,
+      "includes": [],
+      "madeOf": [
+        {
+          "name": "byte[]",
+          "bytes": 65552,
+          "objects": 1
+        }
+      ],
+      "holders": [
+        {
+          "total": 65552,
+          "share": 0.1035,
+          "classes": [
+            "java.util.zip.ZipFile$Source"
+          ],
+          "root": false
+        },
+        {
+          "total": 65552,
+          "share": 0.1035,
+          "classes": [
+            "System Class"
+          ],
+          "root": true,
+          "lives": "from a static field: it lives as long as its class"
+        }
+      ]
+    }
+  ],
+  "more": 0,
+  "spread": []
+}

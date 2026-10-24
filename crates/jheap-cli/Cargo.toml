@@ -1,0 +1,15 @@
+[package]
+name = "jheap-cli"
+description = "jheap: what holds the memory of a JVM, from its heap dump"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "jheap"
+path = "src/main.rs"
+
+[dependencies]
+jheap = { path = "../jheap" }

@@ -1,0 +1,22 @@
+file: inherited-fields.hprof
+format: JAVA PROFILE 1.0.2, 4-byte ids, 513 bytes
+pointers: 32-bit
+parse: 1.9 ms (strings and classes 0.8 ms, objects 0.8 ms, graph 0.3 ms)
+objects: 3 (3 instances, 0 object arrays, 0 primitive arrays)
+classes: 4, strings: 7
+roots: 1 Java Frame 1
+unreachable: 0 B (0%)
+unit: bytes
+total: 40 B (40 bytes)
+samples: 3
+nodes: 4
+paths: 1 ownership chains
+
+# Peaks, and who retains them
+Under each peak, what it is made of, then its holders outward: a line each time what
+they hold grows by over 10%, named by the classes of the application in it, else the
+JDK's. A line other peaks share is where they meet. The root, last, is where it is held from.
+
+1.      40 B    100%  B ← Java Frame
+   made of B 60% in 1 object, TargetB 20% in 1 object, TargetA 20% in 1 object
+   held by      40 B    100%  Java Frame

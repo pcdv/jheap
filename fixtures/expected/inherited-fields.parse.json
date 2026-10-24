@@ -1,0 +1,57 @@
+{
+ "dump": "inherited-fields.hprof",
+ "pointers": "auto",
+ "report": {
+  "fileSize": 513,
+  "idSize": 4,
+  "pointers": "32-bit",
+  "pointersGuessed": false,
+  "heapSpan": 0,
+  "version": "JAVA PROFILE 1.0.2",
+  "stringCount": 7,
+  "classCount": 4,
+  "rootCount": 1,
+  "rootsByType": {
+   "Java Frame": 1
+  },
+  "instanceCount": 3,
+  "objectArrayCount": 0,
+  "primitiveArrayCount": 0,
+  "heapSegmentCount": 1,
+  "heapSegmentBytes": 263,
+  "maxDepthReached": 3,
+  "depthLimitHits": 0,
+  "uniquePathCount": 3,
+  "totalSize": 40,
+  "reachableSize": 40,
+  "unreachableSize": 0
+ },
+ "paths": [
+  {
+   "path": [
+    "Java Frame",
+    "B"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Java Frame",
+    "B",
+    "TargetA"
+   ],
+   "bytes": 8,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Java Frame",
+    "B",
+    "TargetB"
+   ],
+   "bytes": 8,
+   "objects": 1
+  }
+ ]
+}

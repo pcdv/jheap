@@ -1,0 +1,31 @@
+file: static-holder.hprof
+format: JAVA PROFILE 1.0.2, 4-byte ids, 260 bytes
+pointers: 32-bit
+parse: 1.6 ms (strings and classes 0.7 ms, objects 0.6 ms, graph 0.3 ms)
+objects: 1 (1 instances, 0 object arrays, 0 primitive arrays)
+classes: 2, strings: 3
+roots: 1 System Class 1
+unreachable: 0 B (0%)
+unit: bytes
+total: 8 B (8 bytes)
+samples: 1
+nodes: 3
+paths: 1 ownership chains
+
+# Leak suspects: what holds over 10% of the heap
+One object of the application holding much, or many objects of one class that together do,
+each with what kind of memory it is. One dump tells what could grow; a second one tells
+whether it did.
+
+No sign of a leak: what holds most is large objects or many objects of a class, footprint rather
+than a leak. A second dump would tell whether any of it grows.
+
+1. One Held holds 8 B, 100% of the heap, in 1 object.
+   large      the object itself, 8 B of its own
+   verdict    one large object: footprint rather than a leak, unless it keeps growing
+   made of    Held 100% in 1 object
+   held by          8 B    100%  Holder
+                    8 B    100%  System Class
+              from a static field: it lives as long as its class
+
+What an object holds is what the walk reached through it first: something else may hold it too.

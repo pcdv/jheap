@@ -1,0 +1,466 @@
+{
+  "dump": {
+    "file": "server-after.hprof",
+    "kept": null,
+    "counted": true,
+    "total": 633536,
+    "format": "JAVA PROFILE 1.0.2",
+    "idSize": 8,
+    "fileSize": 647867,
+    "pointers": "compressed",
+    "pointersGuessed": true,
+    "parseTimeMs": 5,
+    "objects": 949,
+    "classes": 13,
+    "roots": {
+      "System Class": 1,
+      "Java Frame": 2,
+      "Unknown": 1
+    },
+    "unreachable": 13120
+  },
+  "peaks": [
+    {
+      "rank": 1,
+      "name": "byte[] ← com.example.Session",
+      "total": 538056,
+      "share": 0.8493,
+      "madeOf": [
+        {
+          "name": "byte[]",
+          "bytes": 526784,
+          "objects": 400
+        }
+      ],
+      "holders": [
+        {
+          "total": 538312,
+          "share": 0.8497,
+          "classes": [
+            "com.example.Session",
+            "com.example.Registry",
+            "com.example.Server"
+          ],
+          "root": false,
+          "alsoPeaks": []
+        },
+        {
+          "total": 551792,
+          "share": 0.871,
+          "classes": [
+            "Java Frame"
+          ],
+          "root": true,
+          "lives": "from a thread's stack: as long as the thread holds it, unless something the walk did not show holds it too",
+          "alsoPeaks": []
+        }
+      ]
+    },
+    {
+      "rank": 2,
+      "name": "byte[] ← java.util.zip.ZipFile$Source",
+      "total": 65552,
+      "share": 0.1035,
+      "madeOf": [
+        {
+          "name": "byte[]",
+          "bytes": 65552,
+          "objects": 1
+        }
+      ],
+      "holders": [
+        {
+          "total": 65552,
+          "share": 0.1035,
+          "classes": [
+            "java.util.zip.ZipFile$Source"
+          ],
+          "root": false,
+          "alsoPeaks": []
+        },
+        {
+          "total": 65552,
+          "share": 0.1035,
+          "classes": [
+            "System Class"
+          ],
+          "root": true,
+          "lives": "from a static field: it lives as long as its class",
+          "alsoPeaks": []
+        }
+      ]
+    },
+    {
+      "rank": 3,
+      "name": "byte[] ← (unreachable)",
+      "total": 13096,
+      "share": 0.0207,
+      "madeOf": [
+        {
+          "name": "byte[]",
+          "bytes": 13096,
+          "objects": 6
+        }
+      ],
+      "holders": [
+        {
+          "total": 13120,
+          "share": 0.0207,
+          "classes": [
+            "(unreachable)"
+          ],
+          "root": true,
+          "lives": null,
+          "alsoPeaks": []
+        }
+      ]
+    },
+    {
+      "rank": 4,
+      "name": "int[] ← java.util.HashMap$Node",
+      "total": 9720,
+      "share": 0.0153,
+      "madeOf": [
+        {
+          "name": "int[]",
+          "bytes": 9240,
+          "objects": 15
+        }
+      ],
+      "holders": [
+        {
+          "total": 13480,
+          "share": 0.0213,
+          "classes": [
+            "com.example.Cache"
+          ],
+          "root": false,
+          "alsoPeaks": [
+            5,
+            8,
+            10
+          ]
+        },
+        {
+          "total": 551792,
+          "share": 0.871,
+          "classes": [
+            "Java Frame"
+          ],
+          "root": true,
+          "lives": "from a thread's stack: as long as the thread holds it, unless something the walk did not show holds it too",
+          "alsoPeaks": []
+        }
+      ]
+    },
+    {
+      "rank": 5,
+      "name": "int[] ← java.util.HashMap$Node (2)",
+      "total": 2800,
+      "share": 0.0044,
+      "madeOf": [
+        {
+          "name": "int[]",
+          "bytes": 2680,
+          "objects": 5
+        }
+      ],
+      "holders": [
+        {
+          "total": 3040,
+          "share": 0.0048,
+          "classes": [
+            "java.util.HashMap$Node"
+          ],
+          "root": false,
+          "alsoPeaks": [
+            10
+          ]
+        },
+        {
+          "total": 13480,
+          "share": 0.0213,
+          "classes": [
+            "com.example.Cache"
+          ],
+          "root": false,
+          "alsoPeaks": [
+            4,
+            8,
+            10
+          ]
+        },
+        {
+          "total": 551792,
+          "share": 0.871,
+          "classes": [
+            "Java Frame"
+          ],
+          "root": true,
+          "lives": "from a thread's stack: as long as the thread holds it, unless something the walk did not show holds it too",
+          "alsoPeaks": []
+        }
+      ]
+    },
+    {
+      "rank": 6,
+      "name": "byte[] ← com.example.Chain$Link",
+      "total": 1056,
+      "share": 0.0017,
+      "madeOf": [
+        {
+          "name": "byte[]",
+          "bytes": 1056,
+          "objects": 2
+        }
+      ],
+      "holders": [
+        {
+          "total": 1296,
+          "share": 0.002,
+          "classes": [
+            "com.example.Chain$Link"
+          ],
+          "root": false,
+          "alsoPeaks": []
+        },
+        {
+          "total": 1296,
+          "share": 0.002,
+          "classes": [
+            "com.example.Chain$Link"
+          ],
+          "root": true,
+          "lives": null,
+          "alsoPeaks": []
+        }
+      ]
+    },
+    {
+      "rank": 7,
+      "name": "byte[] ← com.example.Chain$Link (2)",
+      "total": 1008,
+      "share": 0.0016,
+      "madeOf": [
+        {
+          "name": "byte[]",
+          "bytes": 528,
+          "objects": 1
+        }
+      ],
+      "holders": [
+        {
+          "total": 864,
+          "share": 0.0014,
+          "classes": [
+            "com.example.Chain$Link"
+          ],
+          "root": false,
+          "alsoPeaks": []
+        },
+        {
+          "total": 960,
+          "share": 0.0015,
+          "classes": [
+            "com.example.Chain$Link"
+          ],
+          "root": false,
+          "alsoPeaks": []
+        },
+        {
+          "total": 1008,
+          "share": 0.0016,
+          "classes": [
+            "com.example.Chain$Link"
+          ],
+          "root": false,
+          "alsoPeaks": []
+        },
+        {
+          "total": 1704,
+          "share": 0.0027,
+          "classes": [
+            "com.example.Chain$Link"
+          ],
+          "root": false,
+          "alsoPeaks": [
+            9
+          ]
+        },
+        {
+          "total": 1776,
+          "share": 0.0028,
+          "classes": [
+            "com.example.Chain$Link"
+          ],
+          "root": false,
+          "alsoPeaks": [
+            9
+          ]
+        },
+        {
+          "total": 1776,
+          "share": 0.0028,
+          "classes": [
+            "Unknown"
+          ],
+          "root": true,
+          "lives": null,
+          "alsoPeaks": []
+        }
+      ]
+    },
+    {
+      "rank": 8,
+      "name": "byte[] ← java.lang.String",
+      "total": 720,
+      "share": 0.0011,
+      "madeOf": [
+        {
+          "name": "byte[]",
+          "bytes": 360,
+          "objects": 15
+        }
+      ],
+      "holders": [
+        {
+          "total": 720,
+          "share": 0.0011,
+          "classes": [
+            "java.lang.String"
+          ],
+          "root": false,
+          "alsoPeaks": []
+        },
+        {
+          "total": 13480,
+          "share": 0.0213,
+          "classes": [
+            "com.example.Cache"
+          ],
+          "root": false,
+          "alsoPeaks": [
+            4,
+            5,
+            10
+          ]
+        },
+        {
+          "total": 551792,
+          "share": 0.871,
+          "classes": [
+            "Java Frame"
+          ],
+          "root": true,
+          "lives": "from a thread's stack: as long as the thread holds it, unless something the walk did not show holds it too",
+          "alsoPeaks": []
+        }
+      ]
+    },
+    {
+      "rank": 9,
+      "name": "byte[] ← com.example.Chain$Link (3)",
+      "total": 528,
+      "share": 0.0008,
+      "madeOf": [
+        {
+          "name": "byte[]",
+          "bytes": 528,
+          "objects": 1
+        }
+      ],
+      "holders": [
+        {
+          "total": 1704,
+          "share": 0.0027,
+          "classes": [
+            "com.example.Chain$Link"
+          ],
+          "root": false,
+          "alsoPeaks": [
+            7
+          ]
+        },
+        {
+          "total": 1776,
+          "share": 0.0028,
+          "classes": [
+            "com.example.Chain$Link"
+          ],
+          "root": false,
+          "alsoPeaks": [
+            7
+          ]
+        },
+        {
+          "total": 1776,
+          "share": 0.0028,
+          "classes": [
+            "Unknown"
+          ],
+          "root": true,
+          "lives": null,
+          "alsoPeaks": []
+        }
+      ]
+    },
+    {
+      "rank": 10,
+      "name": "byte[] ← java.lang.String (2)",
+      "total": 240,
+      "share": 0.0004,
+      "madeOf": [
+        {
+          "name": "byte[]",
+          "bytes": 120,
+          "objects": 5
+        }
+      ],
+      "holders": [
+        {
+          "total": 240,
+          "share": 0.0004,
+          "classes": [
+            "java.lang.String"
+          ],
+          "root": false,
+          "alsoPeaks": []
+        },
+        {
+          "total": 3040,
+          "share": 0.0048,
+          "classes": [
+            "java.util.HashMap$Node"
+          ],
+          "root": false,
+          "alsoPeaks": [
+            5
+          ]
+        },
+        {
+          "total": 13480,
+          "share": 0.0213,
+          "classes": [
+            "com.example.Cache"
+          ],
+          "root": false,
+          "alsoPeaks": [
+            4,
+            5,
+            8
+          ]
+        },
+        {
+          "total": 551792,
+          "share": 0.871,
+          "classes": [
+            "Java Frame"
+          ],
+          "root": true,
+          "lives": "from a thread's stack: as long as the thread holds it, unless something the walk did not show holds it too",
+          "alsoPeaks": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1064 @@
+{
+ "dump": "server-after.hprof",
+ "pointers": "auto",
+ "report": {
+  "fileSize": 647867,
+  "idSize": 8,
+  "pointers": "compressed",
+  "pointersGuessed": true,
+  "heapSpan": 28928,
+  "version": "JAVA PROFILE 1.0.2",
+  "stringCount": 30,
+  "classCount": 13,
+  "rootCount": 4,
+  "rootsByType": {
+   "System Class": 1,
+   "Java Frame": 2,
+   "Unknown": 1
+  },
+  "instanceCount": 491,
+  "objectArrayCount": 2,
+  "primitiveArrayCount": 456,
+  "heapSegmentCount": 1,
+  "heapSegmentBytes": 646543,
+  "maxDepthReached": 42,
+  "depthLimitHits": 12,
+  "uniquePathCount": 56,
+  "totalSize": 633536,
+  "reachableSize": 620416,
+  "unreachableSize": 13120
+ },
+ "paths": [
+  {
+   "path": [
+    "(unreachable)",
+    "byte[]"
+   ],
+   "bytes": 13096,
+   "objects": 6
+  },
+  {
+   "path": [
+    "(unreachable)",
+    "com.example.Session"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Cache"
+   ],
+   "bytes": 16,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Cache",
+    "java.util.HashMap"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Cache",
+    "java.util.HashMap",
+    "java.util.HashMap$Node[]"
+   ],
+   "bytes": 80,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Cache",
+    "java.util.HashMap",
+    "java.util.HashMap$Node[]",
+    "java.util.HashMap$Node"
+   ],
+   "bytes": 360,
+   "objects": 15
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Cache",
+    "java.util.HashMap",
+    "java.util.HashMap$Node[]",
+    "java.util.HashMap$Node",
+    "int[]"
+   ],
+   "bytes": 9240,
+   "objects": 15
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Cache",
+    "java.util.HashMap",
+    "java.util.HashMap$Node[]",
+    "java.util.HashMap$Node",
+    "java.lang.String"
+   ],
+   "bytes": 360,
+   "objects": 15
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Cache",
+    "java.util.HashMap",
+    "java.util.HashMap$Node[]",
+    "java.util.HashMap$Node",
+    "java.lang.String",
+    "byte[]"
+   ],
+   "bytes": 360,
+   "objects": 15
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Cache",
+    "java.util.HashMap",
+    "java.util.HashMap$Node[]",
+    "java.util.HashMap$Node",
+    "java.util.HashMap$Node"
+   ],
+   "bytes": 120,
+   "objects": 5
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Cache",
+    "java.util.HashMap",
+    "java.util.HashMap$Node[]",
+    "java.util.HashMap$Node",
+    "java.util.HashMap$Node",
+    "int[]"
+   ],
+   "bytes": 2680,
+   "objects": 5
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Cache",
+    "java.util.HashMap",
+    "java.util.HashMap$Node[]",
+    "java.util.HashMap$Node",
+    "java.util.HashMap$Node",
+    "java.lang.String"
+   ],
+   "bytes": 120,
+   "objects": 5
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Cache",
+    "java.util.HashMap",
+    "java.util.HashMap$Node[]",
+    "java.util.HashMap$Node",
+    "java.util.HashMap$Node",
+    "java.lang.String",
+    "byte[]"
+   ],
+   "bytes": 120,
+   "objects": 5
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Server"
+   ],
+   "bytes": 32,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Server",
+    "com.example.Cache"
+   ],
+   "bytes": 16,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Server",
+    "com.example.Registry"
+   ],
+   "bytes": 16,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Server",
+    "com.example.Registry",
+    "java.lang.Object[]"
+   ],
+   "bytes": 1624,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Server",
+    "com.example.Registry",
+    "java.lang.Object[]",
+    "com.example.Session"
+   ],
+   "bytes": 9600,
+   "objects": 400
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Server",
+    "com.example.Registry",
+    "java.lang.Object[]",
+    "com.example.Session",
+    "byte[]"
+   ],
+   "bytes": 526784,
+   "objects": 400
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Server",
+    "com.example.Registry",
+    "java.lang.Object[]",
+    "com.example.Session",
+    "java.lang.String"
+   ],
+   "bytes": 120,
+   "objects": 5
+  },
+  {
+   "path": [
+    "Java Frame",
+    "com.example.Server",
+    "com.example.Registry",
+    "java.lang.Object[]",
+    "com.example.Session",
+    "java.lang.String",
+    "byte[]"
+   ],
+   "bytes": 120,
+   "objects": 5
+  },
+  {
+   "path": [
+    "System Class",
+    "java.util.zip.ZipFile$Source",
+    "byte[]"
+   ],
+   "bytes": 65552,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "byte[]"
+   ],
+   "bytes": 528,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "byte[]"
+   ],
+   "bytes": 528,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "Unknown",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 24,
+   "objects": 1
+  },
+  {
+   "path": [
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "byte[]"
+   ],
+   "bytes": 1056,
+   "objects": 2
+  },
+  {
+   "path": [
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link",
+    "com.example.Chain$Link"
+   ],
+   "bytes": 240,
+   "objects": 10
+  }
+ ]
+}

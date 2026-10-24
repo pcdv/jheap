@@ -1,0 +1,43 @@
+file: inherited-fields.hprof
+format: JAVA PROFILE 1.0.2, 4-byte ids, 513 bytes
+pointers: 32-bit
+parse: 1.8 ms (strings and classes 0.8 ms, objects 0.6 ms, graph 0.3 ms)
+objects: 3 (3 instances, 0 object arrays, 0 primitive arrays)
+classes: 4, strings: 7
+roots: 1 Java Frame 1
+unreachable: 0 B (0%)
+unit: bytes
+total: 40 B (40 bytes)
+samples: 3
+nodes: 4
+paths: 1 ownership chains
+
+# Leak suspects: what holds over 10% of the heap
+One object of the application holding much, or many objects of one class that together do,
+each with what kind of memory it is. One dump tells what could grow; a second one tells
+whether it did.
+
+No sign of a leak: what holds most is large objects or many objects of a class, footprint rather
+than a leak. A second dump would tell whether any of it grows.
+
+1. One TargetA holds 8 B, 20% of the heap, in 1 object.
+   large      the object itself, 8 B of its own
+   verdict    one large object: footprint rather than a leak, unless it keeps growing
+   made of    TargetA 100% in 1 object
+   held by         40 B    100%  B
+                   40 B    100%  Java Frame
+              from a thread's stack: as long as the thread holds it, unless something the walk did not show holds it too
+
+2. One TargetB holds 8 B, 20% of the heap, in 1 object.
+   large      the object itself, 8 B of its own
+   verdict    one large object: footprint rather than a leak, unless it keeps growing
+   made of    TargetB 100% in 1 object
+   held by         40 B    100%  B
+                   40 B    100%  Java Frame
+              from a thread's stack: as long as the thread holds it, unless something the walk did not show holds it too
+
+Also over 10%, but spread over many branches, none of them most: roots of the
+application rather than containers. --trace on one shows its branches.
+     40 B    100%  B
+
+What an object holds is what the walk reached through it first: something else may hold it too.

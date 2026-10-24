@@ -1,0 +1,41 @@
+file: server-after.hprof
+format: JAVA PROFILE 1.0.2, 8-byte ids, 647 867 bytes
+pointers: compressed, guessed from a heap spanning 28.3 KiB: --oops says otherwise
+parse: 4.5 ms (strings and classes 1.7 ms, objects 2.0 ms, graph 0.8 ms)
+objects: 949 (491 instances, 2 object arrays, 456 primitive arrays)
+classes: 13, strings: 30
+roots: 4 Java Frame 2, System Class 1, Unknown 1
+unreachable: 12.8 KiB (2%)
+unit: bytes
+total: 618.7 KiB (633 536 bytes)
+samples: 56
+nodes: 91
+paths: 15 ownership chains
+
+# Leak suspects: what holds over 10% of the heap
+One object of the application holding much, or many objects of one class that together do,
+each with what kind of memory it is. One dump tells what could grow; a second one tells
+whether it did.
+
+Could grow: suspect 1, a collection, which grows with what it holds.
+The others are footprint. Whether it does, a full cache or a leak, only a second dump tells: hl diff <earlier> <later>.
+
+1. One com.example.Registry holds 525.6 KiB, 85% of the heap, in 812 objects.
+   collection 400 com.example.Session, 1.3 KiB each, in 1 java.lang.Object[]
+              through Registry → Object[] → Session
+   verdict    a collection grows with what it holds: a leak if a later dump has more of them
+   made of    byte[] 98% in 405 objects, com.example.Session 2% in 400 objects, java.lang.Object[] 0% in 1 object
+   includes   400 of the 400 com.example.Session
+   held by    525.7 KiB     85%  com.example.Server
+              538.9 KiB     87%  Java Frame
+              from a thread's stack: as long as the thread holds it, unless something the walk did not show holds it too
+
+2. One byte[] holds 64.0 KiB, 10% of the heap, in 1 object.
+   large      the object itself, 64.0 KiB of its own
+   verdict    one large object: footprint rather than a leak, unless it keeps growing
+   made of    byte[] 100% in 1 object
+   held by     64.0 KiB     10%  java.util.zip.ZipFile$Source
+               64.0 KiB     10%  System Class
+              from a static field: it lives as long as its class
+
+What an object holds is what the walk reached through it first: something else may hold it too.

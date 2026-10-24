@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "type": "module",
+  "description": "Builds the test dumps and records what heap-landscape's JS parser and CLI make of them"
+}

@@ -1,0 +1,71 @@
+{
+  "dump": {
+    "file": "inherited-fields.hprof",
+    "kept": null,
+    "counted": true,
+    "total": 40,
+    "format": "JAVA PROFILE 1.0.2",
+    "idSize": 4,
+    "fileSize": 513,
+    "pointers": "32-bit",
+    "pointersGuessed": false,
+    "parseTimeMs": 2,
+    "objects": 3,
+    "classes": 4,
+    "roots": {
+      "Java Frame": 1
+    },
+    "unreachable": 0
+  },
+  "owners": [
+    {
+      "name": "B",
+      "total": 40,
+      "share": 1
+    }
+  ],
+  "chains": [
+    {
+      "name": "B",
+      "total": 40,
+      "own": 24,
+      "share": 1,
+      "path": [
+        "Java Frame",
+        "B"
+      ]
+    }
+  ],
+  "classes": [
+    {
+      "name": "B",
+      "bytes": 24,
+      "share": 0.6,
+      "objects": 1
+    },
+    {
+      "name": "TargetA",
+      "bytes": 8,
+      "share": 0.2,
+      "objects": 1
+    },
+    {
+      "name": "TargetB",
+      "bytes": 8,
+      "share": 0.2,
+      "objects": 1
+    }
+  ],
+  "holders": [
+    {
+      "name": "Java Frame",
+      "total": 24,
+      "share": 0.6
+    },
+    {
+      "name": "B",
+      "total": 16,
+      "share": 0.4
+    }
+  ]
+}

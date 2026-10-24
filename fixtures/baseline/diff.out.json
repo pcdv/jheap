@@ -1,0 +1,162 @@
+{
+  "before": {
+    "file": "server-before.hprof",
+    "kept": null,
+    "counted": true,
+    "total": 162536,
+    "format": "JAVA PROFILE 1.0.2",
+    "idSize": 8,
+    "fileSize": 168017,
+    "pointers": "compressed",
+    "pointersGuessed": true,
+    "parseTimeMs": 3,
+    "objects": 242,
+    "classes": 13,
+    "roots": {
+      "System Class": 1,
+      "Java Frame": 2,
+      "Unknown": 1
+    },
+    "unreachable": 13120,
+    "bytes": 149416
+  },
+  "after": {
+    "file": "server-after.hprof",
+    "kept": null,
+    "counted": true,
+    "total": 633536,
+    "format": "JAVA PROFILE 1.0.2",
+    "idSize": 8,
+    "fileSize": 647867,
+    "pointers": "compressed",
+    "pointersGuessed": true,
+    "parseTimeMs": 2,
+    "objects": 942,
+    "classes": 13,
+    "roots": {
+      "System Class": 1,
+      "Java Frame": 2,
+      "Unknown": 1
+    },
+    "unreachable": 13120,
+    "bytes": 620416
+  },
+  "grew": 471000,
+  "shrank": 0,
+  "share": 0.1,
+  "verdict": "leak-sign",
+  "suspects": [
+    {
+      "rank": 1,
+      "kind": "one",
+      "verdict": "collection",
+      "name": "com.example.Registry",
+      "total": 471000,
+      "share": 1,
+      "objects": 700,
+      "at": 1,
+      "statics": false,
+      "gathered": {
+        "name": "com.example.Session",
+        "objects": 350,
+        "there": 400,
+        "total": 469600,
+        "through": [
+          "java.lang.Object[]"
+        ],
+        "containers": {
+          "name": "java.lang.Object[]",
+          "objects": 1
+        }
+      },
+      "includes": [
+        {
+          "name": "com.example.Session",
+          "objects": 350,
+          "all": 350,
+          "total": 469600
+        }
+      ],
+      "madeOf": [
+        {
+          "name": "byte[]",
+          "bytes": 461200,
+          "objects": 350
+        },
+        {
+          "name": "com.example.Session",
+          "bytes": 8400,
+          "objects": 350
+        },
+        {
+          "name": "java.lang.Object[]",
+          "bytes": 1400,
+          "objects": 0
+        }
+      ],
+      "holders": [
+        {
+          "total": 471000,
+          "share": 1,
+          "classes": [
+            "com.example.Server"
+          ],
+          "root": false
+        },
+        {
+          "total": 471000,
+          "share": 1,
+          "classes": [
+            "Java Frame"
+          ],
+          "root": true,
+          "lives": "from a thread's stack: as long as the thread holds it, unless something the walk did not show holds it too"
+        }
+      ],
+      "before": {
+        "bytes": 67264,
+        "objects": 112
+      },
+      "after": {
+        "bytes": 538264,
+        "objects": 812
+      }
+    }
+  ],
+  "spread": [],
+  "classes": [
+    {
+      "name": "byte[]",
+      "before": {
+        "bytes": 133848,
+        "objects": 80
+      },
+      "after": {
+        "bytes": 595048,
+        "objects": 430
+      }
+    },
+    {
+      "name": "com.example.Session",
+      "before": {
+        "bytes": 1200,
+        "objects": 50
+      },
+      "after": {
+        "bytes": 9600,
+        "objects": 400
+      }
+    },
+    {
+      "name": "java.lang.Object[]",
+      "before": {
+        "bytes": 224,
+        "objects": 1
+      },
+      "after": {
+        "bytes": 1624,
+        "objects": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+{
+ "dump": "truncated.hprof",
+ "pointers": "auto",
+ "error": "Truncated file: the record at offset 1315 is 646543 bytes long, 259147 more than the file has."
+}

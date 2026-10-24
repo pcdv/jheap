@@ -1,0 +1,23 @@
+file: static-holder.hprof
+format: JAVA PROFILE 1.0.2, 4-byte ids, 260 bytes
+pointers: 32-bit
+parse: 1.6 ms (strings and classes 0.7 ms, objects 0.6 ms, graph 0.3 ms)
+objects: 1 (1 instances, 0 object arrays, 0 primitive arrays)
+classes: 2, strings: 3
+roots: 1 System Class 1
+unreachable: 0 B (0%)
+unit: bytes
+total: 8 B (8 bytes)
+samples: 1
+nodes: 3
+paths: 1 ownership chains
+
+# Peaks, and who retains them
+Under each peak, what it is made of, then its holders outward: a line each time what
+they hold grows by over 10%, named by the classes of the application in it, else the
+JDK's. A line other peaks share is where they meet. The root, last, is where it is held from.
+
+1.       8 B    100%  Held ← Holder
+   made of Held 100% in 1 object
+   held by       8 B    100%  Holder
+                 8 B    100%  System Class

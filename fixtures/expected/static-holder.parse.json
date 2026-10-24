@@ -1,0 +1,40 @@
+{
+ "dump": "static-holder.hprof",
+ "pointers": "auto",
+ "report": {
+  "fileSize": 260,
+  "idSize": 4,
+  "pointers": "32-bit",
+  "pointersGuessed": false,
+  "heapSpan": 0,
+  "version": "JAVA PROFILE 1.0.2",
+  "stringCount": 3,
+  "classCount": 2,
+  "rootCount": 1,
+  "rootsByType": {
+   "System Class": 1
+  },
+  "instanceCount": 1,
+  "objectArrayCount": 0,
+  "primitiveArrayCount": 0,
+  "heapSegmentCount": 1,
+  "heapSegmentBytes": 117,
+  "maxDepthReached": 3,
+  "depthLimitHits": 0,
+  "uniquePathCount": 1,
+  "totalSize": 8,
+  "reachableSize": 8,
+  "unreachableSize": 0
+ },
+ "paths": [
+  {
+   "path": [
+    "System Class",
+    "Holder",
+    "Held"
+   ],
+   "bytes": 8,
+   "objects": 1
+  }
+ ]
+}

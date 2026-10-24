@@ -1,0 +1,22 @@
+before: server-before.hprof: 145.9 KiB, 242 objects
+after:  server-after.hprof: 605.9 KiB, 942 objects
+change: +460.0 KiB, +700 objects
+moved:  460.0 KiB in the paths that grew, 0 B in those that shrank or went.
+An object reached another way in the later dump moves from one path to another and shows in
+both: the growth that is not moved is the difference of the two. What nothing reaches is left out.
+
+# Where it grew: what gained over 10% of the growth
+Signs of a leak: suspect 1, a collection that gained many objects between the dumps.
+
+1. One com.example.Registry gained 460.0 KiB, 100% of the growth, 700 objects.
+   size       65.7 KiB in 112 objects before, 525.6 KiB in 812 objects after
+   collection +350 com.example.Session (400 there now), 1.3 KiB each, in 1 java.lang.Object[]
+              through Registry → Object[] → Session
+   includes   +350 com.example.Session
+   held by    com.example.Server
+              Java Frame
+
+# Classes, by the objects they gained
+        +350  +450.4 KiB  byte[]  (80 → 430)
+        +350    +8.2 KiB  com.example.Session  (50 → 400)
+          +0    +1.4 KiB  java.lang.Object[]  (1 → 1)

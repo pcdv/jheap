@@ -1,0 +1,56 @@
+{
+  "dump": {
+    "file": "static-holder.hprof",
+    "kept": null,
+    "counted": true,
+    "total": 8,
+    "format": "JAVA PROFILE 1.0.2",
+    "idSize": 4,
+    "fileSize": 260,
+    "pointers": "32-bit",
+    "pointersGuessed": false,
+    "parseTimeMs": 2,
+    "objects": 1,
+    "classes": 2,
+    "roots": {
+      "System Class": 1
+    },
+    "unreachable": 0
+  },
+  "peaks": [
+    {
+      "rank": 1,
+      "name": "Held ← Holder",
+      "total": 8,
+      "share": 1,
+      "madeOf": [
+        {
+          "name": "Held",
+          "bytes": 8,
+          "objects": 1
+        }
+      ],
+      "holders": [
+        {
+          "total": 8,
+          "share": 1,
+          "classes": [
+            "Holder"
+          ],
+          "root": false,
+          "alsoPeaks": []
+        },
+        {
+          "total": 8,
+          "share": 1,
+          "classes": [
+            "System Class"
+          ],
+          "root": true,
+          "lives": "from a static field: it lives as long as its class",
+          "alsoPeaks": []
+        }
+      ]
+    }
+  ]
+}

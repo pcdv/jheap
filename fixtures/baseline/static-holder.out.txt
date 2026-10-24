@@ -1,0 +1,28 @@
+file: static-holder.hprof
+format: JAVA PROFILE 1.0.2, 4-byte ids, 260 bytes
+pointers: 32-bit
+parse: 1.6 ms (strings and classes 0.7 ms, objects 0.6 ms, graph 0.3 ms)
+objects: 1 (1 instances, 0 object arrays, 0 primitive arrays)
+classes: 2, strings: 3
+roots: 1 System Class 1
+unreachable: 0 B (0%)
+unit: bytes
+total: 8 B (8 bytes)
+samples: 1
+nodes: 3
+paths: 1 ownership chains
+
+# By application class: the weight of the chains held through it
+      8 B    100%  Held
+
+# Ownership chains: the object that holds the memory, then its holders
+      8 B    100%  Held ← Holder ← System Class  [own 8 B]
+
+# Classes, by shallow size
+      8 B    100%  Held  1 object
+
+# Holders, by the size of what they hold
+      8 B    100%  Holder
+
+# Paths
+      8 B    100%  System Class ← Holder ← Held

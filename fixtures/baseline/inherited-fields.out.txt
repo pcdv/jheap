@@ -1,0 +1,33 @@
+file: inherited-fields.hprof
+format: JAVA PROFILE 1.0.2, 4-byte ids, 513 bytes
+pointers: 32-bit
+parse: 1.9 ms (strings and classes 0.9 ms, objects 0.7 ms, graph 0.3 ms)
+objects: 3 (3 instances, 0 object arrays, 0 primitive arrays)
+classes: 4, strings: 7
+roots: 1 Java Frame 1
+unreachable: 0 B (0%)
+unit: bytes
+total: 40 B (40 bytes)
+samples: 3
+nodes: 4
+paths: 1 ownership chains
+
+# By application class: the weight of the chains held through it
+     40 B    100%  B
+
+# Ownership chains: the object that holds the memory, then its holders
+     40 B    100%  B ← Java Frame  [own 24 B]
+
+# Classes, by shallow size
+     24 B     60%  B  1 object
+      8 B     20%  TargetA  1 object
+      8 B     20%  TargetB  1 object
+
+# Holders, by the size of what they hold
+     24 B     60%  Java Frame
+     16 B     40%  B
+
+# Paths
+     24 B     60%  Java Frame ← B
+      8 B     20%  Java Frame ← B ← TargetA
+      8 B     20%  Java Frame ← B ← TargetB

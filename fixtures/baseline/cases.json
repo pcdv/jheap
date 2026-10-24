@@ -1,0 +1,276 @@
+[
+ {
+  "name": "usage",
+  "args": [
+   "hl"
+  ],
+  "exit": 2,
+  "stdout": "usage.out.txt",
+  "stderr": [
+   "Usage: hl <dump.hprof | profile.json> [top]",
+   "       hl peaks <dump.hprof | profile.json> [top]",
+   "       hl leaks <dump.hprof | profile.json> [top] [--share <percent>]",
+   "       hl diff <before> <after> [top] [--share <percent>]",
+   "       hl <dump.hprof | profile.json> --trace <class>",
+   "       hl <dump.hprof> --save <profile.json>",
+   "       hl <dump.hprof> --stats",
+   "       hl <dump.hprof> --oops compressed|wide",
+   "Both input kinds are read: a .hprof is parsed, a profile.json saved from an",
+   "earlier run is read as it is, so several reports can share one parse.",
+   "The parse of a dump is kept next to it, as <name>.hl.json, and read back by",
+   "the next command on the same dump: --fresh parses again, --no-keep keeps none.",
+   "--json prints one JSON document instead of text. Exit codes: 0 found, 1 broke,",
+   "2 called wrong, 3 found nothing, 4 a traced name matches several classes."
+  ]
+ },
+ {
+  "name": "truncated",
+  "args": [
+   "hl",
+   "truncated.hprof"
+  ],
+  "exit": 1,
+  "stdout": "truncated.out.txt",
+  "stderr": [
+   "hl: Truncated file: the record at offset 1315 is 646543 bytes long, 259147 more than the file has."
+  ]
+ },
+ {
+  "name": "diff",
+  "args": [
+   "hl",
+   "diff",
+   "server-before.hprof",
+   "server-after.hprof"
+  ],
+  "exit": 0,
+  "stdout": "diff.out.txt",
+  "stderr": []
+ },
+ {
+  "name": "diff.json",
+  "args": [
+   "hl",
+   "diff",
+   "server-before.hprof",
+   "server-after.hprof",
+   "--json"
+  ],
+  "exit": 0,
+  "stdout": "diff.out.json",
+  "stderr": []
+ },
+ {
+  "name": "static-holder",
+  "args": [
+   "hl",
+   "static-holder.hprof"
+  ],
+  "exit": 0,
+  "stdout": "static-holder.out.txt",
+  "stderr": []
+ },
+ {
+  "name": "static-holder.json",
+  "args": [
+   "hl",
+   "static-holder.hprof",
+   "--json"
+  ],
+  "exit": 0,
+  "stdout": "static-holder.out.json",
+  "stderr": []
+ },
+ {
+  "name": "static-holder.peaks",
+  "args": [
+   "hl",
+   "peaks",
+   "static-holder.hprof"
+  ],
+  "exit": 0,
+  "stdout": "static-holder.peaks.out.txt",
+  "stderr": []
+ },
+ {
+  "name": "static-holder.peaks.json",
+  "args": [
+   "hl",
+   "peaks",
+   "static-holder.hprof",
+   "--json"
+  ],
+  "exit": 0,
+  "stdout": "static-holder.peaks.out.json",
+  "stderr": []
+ },
+ {
+  "name": "static-holder.leaks",
+  "args": [
+   "hl",
+   "leaks",
+   "static-holder.hprof"
+  ],
+  "exit": 0,
+  "stdout": "static-holder.leaks.out.txt",
+  "stderr": []
+ },
+ {
+  "name": "static-holder.leaks.json",
+  "args": [
+   "hl",
+   "leaks",
+   "static-holder.hprof",
+   "--json"
+  ],
+  "exit": 0,
+  "stdout": "static-holder.leaks.out.json",
+  "stderr": []
+ },
+ {
+  "name": "inherited-fields",
+  "args": [
+   "hl",
+   "inherited-fields.hprof"
+  ],
+  "exit": 0,
+  "stdout": "inherited-fields.out.txt",
+  "stderr": []
+ },
+ {
+  "name": "inherited-fields.json",
+  "args": [
+   "hl",
+   "inherited-fields.hprof",
+   "--json"
+  ],
+  "exit": 0,
+  "stdout": "inherited-fields.out.json",
+  "stderr": []
+ },
+ {
+  "name": "inherited-fields.peaks",
+  "args": [
+   "hl",
+   "peaks",
+   "inherited-fields.hprof"
+  ],
+  "exit": 0,
+  "stdout": "inherited-fields.peaks.out.txt",
+  "stderr": []
+ },
+ {
+  "name": "inherited-fields.peaks.json",
+  "args": [
+   "hl",
+   "peaks",
+   "inherited-fields.hprof",
+   "--json"
+  ],
+  "exit": 0,
+  "stdout": "inherited-fields.peaks.out.json",
+  "stderr": []
+ },
+ {
+  "name": "inherited-fields.leaks",
+  "args": [
+   "hl",
+   "leaks",
+   "inherited-fields.hprof"
+  ],
+  "exit": 0,
+  "stdout": "inherited-fields.leaks.out.txt",
+  "stderr": []
+ },
+ {
+  "name": "inherited-fields.leaks.json",
+  "args": [
+   "hl",
+   "leaks",
+   "inherited-fields.hprof",
+   "--json"
+  ],
+  "exit": 0,
+  "stdout": "inherited-fields.leaks.out.json",
+  "stderr": []
+ },
+ {
+  "name": "server-after",
+  "args": [
+   "hl",
+   "server-after.hprof"
+  ],
+  "exit": 0,
+  "stdout": "server-after.out.txt",
+  "stderr": []
+ },
+ {
+  "name": "server-after.json",
+  "args": [
+   "hl",
+   "server-after.hprof",
+   "--json"
+  ],
+  "exit": 0,
+  "stdout": "server-after.out.json",
+  "stderr": []
+ },
+ {
+  "name": "server-after.peaks",
+  "args": [
+   "hl",
+   "peaks",
+   "server-after.hprof"
+  ],
+  "exit": 0,
+  "stdout": "server-after.peaks.out.txt",
+  "stderr": []
+ },
+ {
+  "name": "server-after.peaks.json",
+  "args": [
+   "hl",
+   "peaks",
+   "server-after.hprof",
+   "--json"
+  ],
+  "exit": 0,
+  "stdout": "server-after.peaks.out.json",
+  "stderr": []
+ },
+ {
+  "name": "server-after.leaks",
+  "args": [
+   "hl",
+   "leaks",
+   "server-after.hprof"
+  ],
+  "exit": 0,
+  "stdout": "server-after.leaks.out.txt",
+  "stderr": []
+ },
+ {
+  "name": "server-after.leaks.json",
+  "args": [
+   "hl",
+   "leaks",
+   "server-after.hprof",
+   "--json"
+  ],
+  "exit": 0,
+  "stdout": "server-after.leaks.out.json",
+  "stderr": []
+ },
+ {
+  "name": "server-after.trace",
+  "args": [
+   "hl",
+   "server-after.hprof",
+   "--trace",
+   "com.example.Session"
+  ],
+  "exit": 0,
+  "stdout": "server-after.trace.out.txt",
+  "stderr": []
+ }
+]

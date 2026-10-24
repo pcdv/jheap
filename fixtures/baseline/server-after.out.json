@@ -1,0 +1,246 @@
+{
+  "dump": {
+    "file": "server-after.hprof",
+    "kept": null,
+    "counted": true,
+    "total": 633536,
+    "format": "JAVA PROFILE 1.0.2",
+    "idSize": 8,
+    "fileSize": 647867,
+    "pointers": "compressed",
+    "pointersGuessed": true,
+    "parseTimeMs": 4,
+    "objects": 949,
+    "classes": 13,
+    "roots": {
+      "System Class": 1,
+      "Java Frame": 2,
+      "Unknown": 1
+    },
+    "unreachable": 13120
+  },
+  "owners": [
+    {
+      "name": "com.example.Session",
+      "total": 538320,
+      "share": 0.8497
+    },
+    {
+      "name": "java.util.zip.ZipFile$Source",
+      "total": 65552,
+      "share": 0.1035
+    },
+    {
+      "name": "com.example.Cache",
+      "total": 13496,
+      "share": 0.0213
+    },
+    {
+      "name": "(unreachable)",
+      "total": 13096,
+      "share": 0.0207
+    },
+    {
+      "name": "com.example.Chain$Link",
+      "total": 3072,
+      "share": 0.0048
+    }
+  ],
+  "chains": [
+    {
+      "name": "byte[]",
+      "total": 538056,
+      "own": 538056,
+      "share": 0.8493,
+      "path": [
+        "Java Frame",
+        "com.example.Server",
+        "com.example.Registry",
+        "java.lang.Object[]",
+        "com.example.Session",
+        "byte[]"
+      ]
+    },
+    {
+      "name": "byte[]",
+      "total": 65552,
+      "own": 65552,
+      "share": 0.1035,
+      "path": [
+        "System Class",
+        "java.util.zip.ZipFile$Source",
+        "byte[]"
+      ]
+    },
+    {
+      "name": "byte[]",
+      "total": 13096,
+      "own": 13096,
+      "share": 0.0207,
+      "path": [
+        "(unreachable)",
+        "byte[]"
+      ]
+    },
+    {
+      "name": "int[]",
+      "total": 9720,
+      "own": 9720,
+      "share": 0.0153,
+      "path": [
+        "Java Frame",
+        "com.example.Cache",
+        "java.util.HashMap",
+        "java.util.HashMap$Node[]",
+        "java.util.HashMap$Node",
+        "int[]"
+      ]
+    }
+  ],
+  "classes": [
+    {
+      "name": "byte[]",
+      "bytes": 608144,
+      "share": 0.9599,
+      "objects": 436
+    },
+    {
+      "name": "int[]",
+      "bytes": 11920,
+      "share": 0.0188,
+      "objects": 20
+    },
+    {
+      "name": "com.example.Session",
+      "bytes": 9624,
+      "share": 0.0152,
+      "objects": 401
+    },
+    {
+      "name": "java.lang.Object[]",
+      "bytes": 1624,
+      "share": 0.0026,
+      "objects": 1
+    },
+    {
+      "name": "com.example.Chain$Link",
+      "bytes": 960,
+      "share": 0.0015,
+      "objects": 40
+    },
+    {
+      "name": "java.lang.String",
+      "bytes": 600,
+      "share": 0.0009,
+      "objects": 25
+    },
+    {
+      "name": "java.util.HashMap$Node",
+      "bytes": 480,
+      "share": 0.0008,
+      "objects": 20
+    },
+    {
+      "name": "java.util.HashMap$Node[]",
+      "bytes": 80,
+      "share": 0.0001,
+      "objects": 1
+    },
+    {
+      "name": "com.example.Cache",
+      "bytes": 32,
+      "share": 0.0001,
+      "objects": 2
+    },
+    {
+      "name": "com.example.Server",
+      "bytes": 32,
+      "share": 0.0001,
+      "objects": 1
+    },
+    {
+      "name": "java.util.HashMap",
+      "bytes": 24,
+      "share": 0,
+      "objects": 1
+    },
+    {
+      "name": "com.example.Registry",
+      "bytes": 16,
+      "share": 0,
+      "objects": 1
+    }
+  ],
+  "holders": [
+    {
+      "name": "com.example.Session",
+      "total": 526904,
+      "share": 0.8317
+    },
+    {
+      "name": "java.util.zip.ZipFile$Source",
+      "total": 65552,
+      "share": 0.1035
+    },
+    {
+      "name": "(unreachable)",
+      "total": 13120,
+      "share": 0.0207
+    },
+    {
+      "name": "java.util.HashMap$Node",
+      "total": 12520,
+      "share": 0.0198
+    },
+    {
+      "name": "java.lang.Object[]",
+      "total": 9600,
+      "share": 0.0152
+    },
+    {
+      "name": "com.example.Chain$Link",
+      "total": 3048,
+      "share": 0.0048
+    },
+    {
+      "name": "com.example.Registry",
+      "total": 1624,
+      "share": 0.0026
+    },
+    {
+      "name": "java.lang.String",
+      "total": 600,
+      "share": 0.0009
+    },
+    {
+      "name": "java.util.HashMap$Node[]",
+      "total": 360,
+      "share": 0.0006
+    },
+    {
+      "name": "java.util.HashMap",
+      "total": 80,
+      "share": 0.0001
+    },
+    {
+      "name": "Java Frame",
+      "total": 48,
+      "share": 0.0001
+    },
+    {
+      "name": "com.example.Server",
+      "total": 32,
+      "share": 0.0001
+    },
+    {
+      "name": "com.example.Cache",
+      "total": 24,
+      "share": 0
+    },
+    {
+      "name": "Unknown",
+      "total": 24,
+      "share": 0
+    }
+  ]
+}

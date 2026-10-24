@@ -1,0 +1,30 @@
+file: server-after.hprof
+format: JAVA PROFILE 1.0.2, 8-byte ids, 647 867 bytes
+pointers: compressed, guessed from a heap spanning 28.3 KiB: --oops says otherwise
+parse: 4.9 ms (strings and classes 1.6 ms, objects 2.3 ms, graph 1.0 ms)
+objects: 949 (491 instances, 2 object arrays, 456 primitive arrays)
+classes: 13, strings: 30
+roots: 4 Java Frame 2, System Class 1, Unknown 1
+unreachable: 12.8 KiB (2%)
+unit: bytes
+total: 618.7 KiB (633 536 bytes)
+samples: 56
+nodes: 91
+paths: 15 ownership chains
+
+# Trace: com.example.Session
+401 objects of that class, on 2 paths; the heaviest path holds 524.0 KiB in 810 objects.
+
+What it holds (524.0 KiB), the heaviest first:
+514.4 KiB     83%  byte[]  [own 514.4 KiB, 400 objects]
+    240 B      0%  java.lang.String  [own 120 B, 10 objects]
+
+Who holds it, the nearest first, each as a share of the 538.9 KiB the outermost holds:
+525.6 KiB     85%  java.lang.Object[]
+525.6 KiB     85%  com.example.Registry
+525.7 KiB     85%  com.example.Server
+538.9 KiB     87%  Java Frame
+
+The chain in one line, as the panel names it:
+  com.example.Session ← java.lang.Object[] ← com.example.Registry ← com.example.Server ← Java Frame
+  524.0 KiB at the peak, 538.9 KiB at the Java Frame it hangs from.

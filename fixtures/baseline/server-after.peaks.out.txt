@@ -1,0 +1,76 @@
+file: server-after.hprof
+format: JAVA PROFILE 1.0.2, 8-byte ids, 647 867 bytes
+pointers: compressed, guessed from a heap spanning 28.3 KiB: --oops says otherwise
+parse: 4.7 ms (strings and classes 1.9 ms, objects 2.0 ms, graph 0.8 ms)
+objects: 949 (491 instances, 2 object arrays, 456 primitive arrays)
+classes: 13, strings: 30
+roots: 4 Java Frame 2, System Class 1, Unknown 1
+unreachable: 12.8 KiB (2%)
+unit: bytes
+total: 618.7 KiB (633 536 bytes)
+samples: 56
+nodes: 91
+paths: 15 ownership chains
+
+# Peaks, and who retains them
+Under each peak, what it is made of, then its holders outward: a line each time what
+they hold grows by over 10%, named by the classes of the application in it, else the
+JDK's. A line other peaks share is where they meet. The root, last, is where it is held from.
+
+1.  525.4 KiB     85%  byte[] ← com.example.Session
+    made of byte[] 100% in 400 objects
+    held by 525.7 KiB     85%  com.example.Session ← com.example.Registry ← com.example.Server
+            538.9 KiB     87%  Java Frame
+
+2.   64.0 KiB     10%  byte[] ← java.util.zip.ZipFile$Source
+    made of byte[] 100% in 1 object
+    held by  64.0 KiB     10%  java.util.zip.ZipFile$Source
+             64.0 KiB     10%  System Class
+
+3.   12.8 KiB      2%  byte[] ← (unreachable)
+    made of byte[] 100% in 6 objects
+    held by  12.8 KiB      2%  (unreachable)
+
+4.    9.5 KiB      2%  int[] ← java.util.HashMap$Node
+    made of int[] 100% in 15 objects
+    held by  13.2 KiB      2%  com.example.Cache  (also peaks 5, 8, 10)
+            538.9 KiB     87%  Java Frame
+
+5.    2.7 KiB      0%  int[] ← java.util.HashMap$Node (2)
+    made of int[] 100% in 5 objects
+    held by   3.0 KiB      0%  java.util.HashMap$Node  (also peak 10)
+             13.2 KiB      2%  com.example.Cache  (also peaks 4, 8, 10)
+            538.9 KiB     87%  Java Frame
+
+6.    1.0 KiB      0%  byte[] ← com.example.Chain$Link
+    made of byte[] 100% in 2 objects
+    held by   1.3 KiB      0%  com.example.Chain$Link
+              1.3 KiB      0%  com.example.Chain$Link
+
+7.     1008 B      0%  byte[] ← com.example.Chain$Link (2)
+    made of byte[] 100% in 1 object
+    held by     864 B      0%  com.example.Chain$Link
+                960 B      0%  com.example.Chain$Link
+               1008 B      0%  com.example.Chain$Link
+              1.7 KiB      0%  com.example.Chain$Link  (also peak 9)
+              1.7 KiB      0%  com.example.Chain$Link  (also peak 9)
+              1.7 KiB      0%  Unknown
+
+8.      720 B      0%  byte[] ← java.lang.String
+    made of byte[] 100% in 15 objects
+    held by     720 B      0%  java.lang.String
+             13.2 KiB      2%  com.example.Cache  (also peaks 4, 5, 10)
+            538.9 KiB     87%  Java Frame
+
+9.      528 B      0%  byte[] ← com.example.Chain$Link (3)
+    made of byte[] 100% in 1 object
+    held by   1.7 KiB      0%  com.example.Chain$Link  (also peak 7)
+              1.7 KiB      0%  com.example.Chain$Link  (also peak 7)
+              1.7 KiB      0%  Unknown
+
+10.     240 B      0%  byte[] ← java.lang.String (2)
+    made of byte[] 100% in 5 objects
+    held by     240 B      0%  java.lang.String
+              3.0 KiB      0%  java.util.HashMap$Node  (also peak 5)
+             13.2 KiB      2%  com.example.Cache  (also peaks 4, 5, 8)
+            538.9 KiB     87%  Java Frame
