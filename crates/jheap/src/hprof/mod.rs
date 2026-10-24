@@ -18,10 +18,16 @@ mod walk;
 
 pub(crate) use tags::ROOT_NAMES;
 
+/// The revision of what a parse gives: raised with any change to the paths,
+/// their bytes or objects, or the report, so that a parse kept by an earlier
+/// revision is not read in place of a new one.
+pub const REVISION: u32 = 1;
+
 use std::fmt;
 use std::io::{self, Read, Seek};
 
-use serde::{Serialize, Serializer};
+use serde::de::{MapAccess, Visitor};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use cursor::{CHUNK, Cursor};
 
@@ -29,8 +35,9 @@ use cursor::{CHUNK, Cursor};
 /// every one at the width of its ids. Compressed, the default of a 64-bit JVM
 /// under 32 GB of heap, a reference is 4 bytes and a header 12; wide, 8 and
 /// 16; a 32-bit JVM, 4 and 8.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub enum Pointers {
+    #[default]
     #[serde(rename = "compressed")]
     Compressed,
     #[serde(rename = "wide")]
@@ -164,8 +171,8 @@ pub(crate) fn layout_of(id_size: usize, pointers: Option<Pointers>, heap_span: u
 
 /// What a parse says of the dump and of itself, as heap-landscape's parse
 /// report: the profile document carries it as `heap.report`.
-#[derive(Debug, Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", default)]
 pub struct Report {
     pub file_name: String,
     /// Bytes.
@@ -191,7 +198,7 @@ pub struct Report {
     pub class_count: u64,
     pub root_count: u64,
     /// The roots of each type, in the order first seen.
-    #[serde(serialize_with = "in_order")]
+    #[serde(serialize_with = "in_order", deserialize_with = "read_in_order")]
     pub roots_by_type: Vec<(String, u64)>,
     pub instance_count: u64,
     pub object_array_count: u64,
@@ -214,6 +221,25 @@ pub struct Report {
 
 fn in_order<S: Serializer>(entries: &[(String, u64)], s: S) -> Result<S::Ok, S::Error> {
     s.collect_map(entries.iter().map(|(k, v)| (k, v)))
+}
+
+/// A map read in the order it is written, which a map type would not keep.
+fn read_in_order<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<(String, u64)>, D::Error> {
+    struct InOrder;
+    impl<'de> Visitor<'de> for InOrder {
+        type Value = Vec<(String, u64)>;
+        fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            f.write_str("a map of counts")
+        }
+        fn visit_map<A: MapAccess<'de>>(self, mut map: A) -> Result<Self::Value, A::Error> {
+            let mut entries = Vec::new();
+            while let Some(entry) = map.next_entry::<String, u64>()? {
+                entries.push(entry);
+            }
+            Ok(entries)
+        }
+    }
+    d.deserialize_map(InOrder)
 }
 
 /// One path from a root: its frames, root first, and the objects that end

@@ -2,6 +2,8 @@
 //! profiles hold stacks. The models read it, and it is what is kept beside a
 //! dump and what the web app draws.
 
+pub mod document;
+
 use std::sync::OnceLock;
 
 use crate::hash::FxHashMap;
