@@ -9,7 +9,7 @@ jheap diff before.hprof after.hprof # what grew between two dumps
 ```
 
 A single binary, no runtime to install: copy it next to the dump. It also runs in
-the browser, as WebAssembly, behind heap-landscape's drawing of the heap.
+the browser, as WebAssembly, behind mountain-graph's drawing of the heap.
 
 A dump of 4.6 GB, 46 million objects, is read in 4 seconds at a peak of 1 GB of
 memory, 22 bytes an object: the dump itself is never held, only its object graph.
@@ -95,7 +95,7 @@ several others is counted under one of them.
 | `--fresh` | parse again, even when a parse is kept beside the dump |
 | `--no-keep` | keep no parse beside the dump |
 | `--oops compressed\|wide` | the width of references, guessed from the heap's span (compressed under 32 GB) |
-| `--save <file>` | write the profile there too, for heap-landscape or jfr-web |
+| `--save <file>` | write the profile there too, for mountain-graph or jfr-web |
 | `--dir <path>` | look for the most recent dump there, not in the current directory |
 | `--stats` | parse again and say what it cost: time, and peak memory |
 | `--color auto\|always\|never` | colour on a terminal by default; `NO_COLOR` turns it off |
@@ -115,7 +115,7 @@ share that is not yours to write to. Where the directory cannot be written, jhea
 says so and goes on.
 
 The kept parse is a profile in [jfr-web](https://github.com/pcdv/jfr-web)'s format
-(version 4), with a column of object counts and the parse's report: heap-landscape
+(version 4), with a column of object counts and the parse's report: mountain-graph
 opens it as it opens the dump, and so does every command here.
 
 ### Leaving the dump out
@@ -188,4 +188,4 @@ archives and the scoop manifest (`.github/workflows/release.yml`), and refuses a
 tag that is not the version in `Cargo.toml`.
 
 Work in progress: a Rust rewrite of heap-landscape's parser and `hl` command, and
-now the parser of its web app. See [CLAUDE.md](CLAUDE.md) for the plan.
+now the parser of mountain-graph's page. See [CLAUDE.md](CLAUDE.md) for the plan.

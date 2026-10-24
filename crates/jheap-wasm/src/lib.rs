@@ -6,8 +6,9 @@
 //! comes back is the profile document and the parse's report, as JSON: 1.8 MB
 //! for a dump of 4.6 GB. The object graph never crosses into JavaScript.
 //!
-//! No wasm-bindgen: heap-landscape has no build step, so the module exports a
-//! few plain functions, imports three, and a page module of its own wraps them.
+//! No wasm-bindgen: mountain-graph's page has no build step, so the module
+//! exports a few plain functions, imports three, and a page module of its own
+//! wraps them.
 //!
 //! Imports, from the module `jheap`:
 //!

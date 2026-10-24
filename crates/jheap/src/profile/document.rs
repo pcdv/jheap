@@ -1,5 +1,5 @@
 //! A profile as the JSON document jfr-web's pages read (version 4), which
-//! heap-landscape's web app reads too: strings sorted and front-coded, stack
+//! mountain-graph's page reads too: strings sorted and front-coded, stack
 //! nodes depth first, a sample per path. A heap profile has no time: its
 //! samples are all at 0 and its weights are bytes. It has one column
 //! jfr-web's have not, `samples.objects`, the objects of each sample, which

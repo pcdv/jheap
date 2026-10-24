@@ -1,4 +1,4 @@
-//! The peaks, as heap-landscape draws them, and under each who retains it:
+//! The peaks, as mountain-graph draws them, and under each who retains it:
 //! what it is made of, then its holders outward, a line where what they hold
 //! grows. A line that other peaks share is where they meet, the likelier
 //! culprit.

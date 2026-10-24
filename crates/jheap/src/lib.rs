@@ -1,7 +1,7 @@
 //! Reads JVM heap dumps (.hprof) and says what holds the memory.
 //!
 //! [`parse`] reads a dump through a window, never whole, and gives every path
-//! from a root with the bytes and objects that end there: what heap-landscape
+//! from a root with the bytes and objects that end there: what mountain-graph
 //! draws. A [`Profile`] holds those paths as a tree, and the [`model`]s say
 //! from it who owns the memory, who retains it, what could leak and what grew.
 

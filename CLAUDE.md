@@ -5,8 +5,11 @@ consumers:
 
 - **an agent or a person at a terminal**, through the `jheap` command: a single
   native binary, no runtime to install, meant to run on the server next to the dump;
-- **a person in a browser**, through heap-landscape's web app, which draws the heap
-  as a landscape and gets its parse from jheap compiled to WebAssembly.
+- **a person in a browser**, through [mountain-graph](../mountain-graph)'s page,
+  which draws the heap as a landscape and gets its parse from jheap compiled to
+  WebAssembly. heap-landscape's page moved there on 2026-10-24, beside the
+  profiles of time and allocations it drew the same way; heap-landscape is
+  retired.
 
 ## Where this comes from
 
@@ -35,7 +38,7 @@ behaviour was meant to do: `git -C ../heap-landscape show 75ac409:<path>`.
   Worker (synchronous reads of the `File`, behind `Read + Seek`) and hands back the
   profile and the report, which are small: 1.8 MB for a 4.6 GB dump. The object
   graph never crosses into JavaScript. No wasm-bindgen: a few plain exports,
-  which heap-landscape's `web/js/hprof/jheap.js` wraps. The page keeps its own
+  which mountain-graph's `web/js/hprof/jheap.js` wraps. The page keeps its own
   `model/ownership.js`, which names the same chains as `model::ownership`.
 
 ## Plan
@@ -59,9 +62,11 @@ behaviour was meant to do: `git -C ../heap-landscape show 75ac409:<path>`.
    opens in 18 s there, against 4 s natively: the reads through
    `FileReaderSync` are most of the difference. heap-landscape's parse tests run
    jheap's module. `hl` is gone; the user's heap-dump-analysis skill calls jheap.
+   The page has since moved to mountain-graph, its tests with it.
 
-Later: a dominator tree (heap-landscape's holder tree is a breadth-first spanning
-tree, see its PLAN.md), threads for the first pass, memory-mapped reads.
+Later: a dominator tree (the page's holder tree is a breadth-first spanning
+tree, see mountain-graph's README), threads for the first pass, memory-mapped
+reads.
 
 ## What must not change, and what may
 
@@ -72,7 +77,7 @@ tree, see its PLAN.md), threads for the first pass, memory-mapped reads.
   says why in the message.
 - **The profile document**: jfr-web's version 4 JSON plus `samples.objects` and a
   `heap` object (`key`, `report`), as `tools/report.mjs` writes it
-  (`profile/document.rs`). heap-landscape
+  (`profile/document.rs`). mountain-graph
   and jfr-web read it. The parse kept beside a dump is named `<name>.jheap.json`.
 - **Exit codes**, which agents rely on: 0 found, 1 broke, 2 called wrong, 3 found
   nothing, 4 a traced name matches several classes.
@@ -121,8 +126,9 @@ dumps unzipped aside first, and prints the time beside the JS version's.
 
 - `cargo test` runs everything; the fixtures' tests read `fixtures/`.
 - `node crates/jheap-wasm/install.mjs` builds the WebAssembly module and copies
-  it into heap-landscape beside this checkout, where it is committed: the page
-  has no build step. Run heap-landscape's `npm test` after, which parses with it.
+  it into mountain-graph beside this checkout (or `MOUNTAIN_GRAPH`), where it is
+  committed: the page has no build step. Run mountain-graph's `npm test` after,
+  which parses with it.
 - The fixtures are what the JS implementation made, and are not regenerated
   any more: a deliberate change to the parse edits `fixtures/expected/` in the
   same commit, as said above. `fixtures/generate/record.js` still runs against a
