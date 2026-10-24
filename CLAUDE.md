@@ -11,10 +11,12 @@ consumers:
 ## Where this comes from
 
 jheap is the Rust rewrite of the analysis half of
-[heap-landscape](../heap-landscape): its parser and its `hl` command. That checkout
-is the reference implementation until the port is done. Read it, don't guess:
+[heap-landscape](../heap-landscape): its parser and its `hl` command, which
+heap-landscape no longer has. Its commit `75ac409`, the last before the split,
+holds the JS implementation they were ported from, and says what an unexplained
+behaviour was meant to do: `git -C ../heap-landscape show 75ac409:<path>`.
 
-| What | In heap-landscape |
+| What | In heap-landscape at `75ac409` |
 |---|---|
 | Parser: streaming cursor, object store, walk from the roots | `web/js/hprof/parser.js`, `constants.js` |
 | From the parse to a profile (paths → bytes, objects) | `web/js/load.js` |
@@ -29,11 +31,12 @@ is the reference implementation until the port is done. Read it, don't guess:
 - `crates/jheap`: the library. Parser, object store, profile, models. No I/O beyond
   `Read + Seek`, so it builds for wasm32 unchanged.
 - `crates/jheap-cli`: the `jheap` binary.
-- `crates/jheap-wasm`: the web app's entry point. Parses a dropped file in a Web
+- `crates/jheap-wasm`: the web app's parser. Parses a dropped file in a Web
   Worker (synchronous reads of the `File`, behind `Read + Seek`) and hands back the
-  profile, which is small: 1.8 MB for a 4.6 GB dump. The object graph never crosses
-  into JavaScript. `ownership` is exported too, so the page and the CLI name the
-  same holders.
+  profile and the report, which are small: 1.8 MB for a 4.6 GB dump. The object
+  graph never crosses into JavaScript. No wasm-bindgen: a few plain exports,
+  which heap-landscape's `web/js/hprof/jheap.js` wraps. The page keeps its own
+  `model/ownership.js`, which names the same chains as `model::ownership`.
 
 ## Plan
 
@@ -49,15 +52,13 @@ is the reference implementation until the port is done. Read it, don't guess:
    own (see the README): a one-screen summary by default, `classes` and `info`
    added, JSON versioned; `crates/jheap-cli/tests/cli.rs` runs it. The command may be better than `hl`:
    the baseline is there to compare with, not to copy.
-4. Build the wasm package, run it in the web app, and delete the JS parser and the
-   CLI-only modules from heap-landscape. The repositories split for good here.
-   **The page parses with jheap** (`crates/jheap-wasm`, no wasm-bindgen: a few
-   plain exports, wrapped by heap-landscape's `web/js/hprof/jheap.js`, run in a
-   Web Worker that reads the `File` through `FileReaderSync`), and opens a
-   `.jheap.json`. A 4.6 GB dump opens in 18 s there, against 4 s natively: the
-   reads through `FileReaderSync` are most of the difference. heap-landscape's
-   parse tests run against both parsers. Left: deleting the JS parser, `hl` and
-   its models, which the user's heap-dump-analysis skill still calls.
+4. **Done.** Build the wasm package, run it in the web app, and delete the JS
+   parser and the CLI-only modules from heap-landscape. The repositories split
+   for good here. The page parses with jheap in a Web Worker that reads the
+   `File` through `FileReaderSync`, and opens a `.jheap.json`. A 4.6 GB dump
+   opens in 18 s there, against 4 s natively: the reads through
+   `FileReaderSync` are most of the difference. heap-landscape's parse tests run
+   jheap's module. `hl` is gone; the user's heap-dump-analysis skill calls jheap.
 
 Later: a dominator tree (heap-landscape's holder tree is a breadth-first spanning
 tree, see its PLAN.md), threads for the first pass, memory-mapped reads.
@@ -122,7 +123,9 @@ dumps unzipped aside first, and prints the time beside the JS version's.
 - `node crates/jheap-wasm/install.mjs` builds the WebAssembly module and copies
   it into heap-landscape beside this checkout, where it is committed: the page
   has no build step. Run heap-landscape's `npm test` after, which parses with it.
-- Regenerate the fixtures with `node fixtures/generate/record.js`, which needs
-  heap-landscape beside this checkout (or `HEAP_LANDSCAPE=<path>`) and Node 21+.
-  Only while the JS implementation is the reference.
+- The fixtures are what the JS implementation made, and are not regenerated
+  any more: a deliberate change to the parse edits `fixtures/expected/` in the
+  same commit, as said above. `fixtures/generate/record.js` still runs against a
+  checkout of heap-landscape at `75ac409` (`git worktree add`), named by
+  `HEAP_LANDSCAPE`, to see what the JS implementation made of a new dump.
 - Comments say why, in full sentences, as in heap-landscape's code.

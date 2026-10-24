@@ -28,6 +28,15 @@ Small heap dumps, and what heap-landscape's JS implementation makes of them.
 node fixtures/generate/record.js
 ```
 
-Needs Node 21+ and heap-landscape checked out beside jheap, or named by
-`HEAP_LANDSCAPE`. `generate/hprof-builder.js` is heap-landscape's
-`test/hprof/hprof-builder.js`, copied.
+Needs Node 21+ and heap-landscape with its JS parser and `hl`, which it no longer
+has: a checkout of its commit `75ac409`, the last before they moved here, named
+by `HEAP_LANDSCAPE`:
+
+```sh
+git -C ../heap-landscape worktree add ../heap-landscape-js 75ac409
+HEAP_LANDSCAPE=../heap-landscape-js node fixtures/generate/record.js
+```
+
+The expected parses are jheap's to keep now: a deliberate change to the parse
+edits them, and says why in its commit. `generate/hprof-builder.js` is
+heap-landscape's `test/hprof/hprof-builder.js`, copied.
