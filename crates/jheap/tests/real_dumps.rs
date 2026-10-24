@@ -12,8 +12,10 @@
 //!
 //! A second test runs the models on each dump and compares their output with
 //! what `hl --json` prints for the report, `peaks` and `leaks`, and for a
-//! `diff` of the two smallest dumps; it needs node, and heap-landscape beside
-//! this checkout or named by `HEAP_LANDSCAPE`.
+//! `diff` of the two smallest dumps; it needs node, and `hl`, which only
+//! heap-landscape's commit `75ac409` has: `HEAP_LANDSCAPE` names a checkout of
+//! it (see fixtures/README.md). jheap's command has since moved on from `hl`'s
+//! output, but the models still give what it gave.
 //!
 //! Nothing they read or print is committed: a parse names the application's
 //! classes.
