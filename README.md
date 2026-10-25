@@ -95,7 +95,7 @@ several others is counted under one of them.
 | `--fresh` | parse again, even when a parse is kept beside the dump |
 | `--no-keep` | keep no parse beside the dump |
 | `--oops compressed\|wide` | the width of references, guessed from the heap's span (compressed under 32 GB) |
-| `--save <file>` | write the profile there too, for mountain-graph or jfr-web |
+| `--save <file>` | write the profile there too, as a Flamepack (`.flamepack.json`), for mountain-graph or jfr-web |
 | `--dir <path>` | look for the most recent dump there, not in the current directory |
 | `--stats` | parse again and say what it cost: time, and peak memory |
 | `--color auto\|always\|never` | colour on a terminal by default; `NO_COLOR` turns it off |
@@ -114,8 +114,9 @@ version. `--fresh` parses again anyway; `--no-keep` keeps nothing, for a dump on
 share that is not yours to write to. Where the directory cannot be written, jheap
 says so and goes on.
 
-The kept parse is a profile in [jfr-web](https://github.com/pcdv/jfr-web)'s format
-(version 4), with a column of object counts and the parse's report: mountain-graph
+The kept parse is a [Flamepack](https://github.com/pcdv/flamepack) (version 4), the
+profile format of [jfr-web](https://github.com/pcdv/jfr-web), with a column of object
+counts and the parse's report as an extra `heap` member: mountain-graph
 opens it as it opens the dump, and so does every command here.
 
 ### Leaving the dump out

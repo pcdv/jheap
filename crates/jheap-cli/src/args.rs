@@ -95,7 +95,7 @@ Options:
   --fresh             parse again, even when a parse is kept beside the dump
   --no-keep           keep no parse beside the dump
   --oops <width>      compressed or wide references; guessed from the heap's span
-  --save <file>       write the profile there too, for mountain-graph or jfr-web
+  --save <file>       write the profile there too, as a Flamepack (.flamepack.json)
   --dir <path>        look for the most recent dump there, not here
   --stats             parse again and say what it cost: time and peak memory
   --color <when>      auto, always or never

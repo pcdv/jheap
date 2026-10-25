@@ -1,6 +1,7 @@
-//! A profile as the JSON document jfr-web's pages read (version 4), which
-//! mountain-graph's page reads too: strings sorted and front-coded, stack
-//! nodes depth first, a sample per path. A heap profile has no time: its
+//! A profile as a Flamepack document (version 4, specified in
+//! https://github.com/pcdv/flamepack), which jfr-web's and mountain-graph's
+//! pages read: strings sorted and front-coded, stack nodes depth first, a
+//! sample per path. A heap profile has no time: its
 //! samples are all at 0 and its weights are bytes. It has one column
 //! jfr-web's have not, `samples.objects`, the objects of each sample, which
 //! jfr-web ignores.
