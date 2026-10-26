@@ -2,6 +2,7 @@
 
 pub mod classes;
 pub mod diff;
+pub mod dups;
 pub mod info;
 pub mod leaks;
 pub mod peaks;

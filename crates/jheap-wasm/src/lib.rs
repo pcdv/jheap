@@ -158,7 +158,8 @@ mod exports {
             let phase = match phase {
                 Phase::Metadata => 0,
                 Phase::Objects => 1,
-                Phase::Paths => 2,
+                // the page does not ask for the duplicates
+                Phase::Paths | Phase::Duplicates => 2,
             };
             // SAFETY: an import of the page, which takes two numbers
             unsafe { progress(phase, percent) }

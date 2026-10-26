@@ -8,6 +8,10 @@ use std::process::{Command, Output};
 
 use serde_json::Value;
 
+// the library's builder of synthetic dumps, for a dump with Strings in it
+#[path = "../../jheap/tests/support/hprof.rs"]
+mod hprof;
+
 /// A directory with copies of the fixture dumps, removed when dropped.
 struct Dir(PathBuf);
 
@@ -221,6 +225,122 @@ fn a_saved_profile_is_read_as_the_dump_was() {
     let doc: Value = serde_json::from_str(&fs::read_to_string(d.path("server.profile.json")).unwrap()).unwrap();
     assert_eq!(doc["version"], 5);
     assert!(doc["samples"]["objects"].is_array());
+}
+
+/// A heap of a cache holding six Strings: "hello" three times and "x;y"
+/// twice, each in an array of its own, and "once".
+fn strings_dump() -> Vec<u8> {
+    use hprof::{Builder, ROOT_JAVA_FRAME, TYPE_BYTE, TYPE_INT, TYPE_OBJECT};
+    let mut b = Builder::new(Vec::new(), 8).unwrap();
+    for (i, name) in ["java.lang.String", "[Ljava/lang/Object;", "com.example.Cache"].iter().enumerate() {
+        b.string(0x10 + i as u64, name).unwrap();
+        b.load_class(i as u32 + 1, 0x1000 + i as u64, 0x10 + i as u64).unwrap();
+    }
+    for (i, field) in ["value", "coder", "hash", "items"].iter().enumerate() {
+        b.string(0x20 + i as u64, field).unwrap();
+    }
+    b.class_dump(0x1000, 0, &[(0x20, TYPE_OBJECT), (0x21, TYPE_BYTE), (0x22, TYPE_INT)], &[]).unwrap();
+    b.class_dump(0x1001, 0, &[], &[]).unwrap();
+    b.class_dump(0x1002, 0, &[(0x23, TYPE_OBJECT)], &[]).unwrap();
+    let mut held = Vec::new();
+    for (i, text) in ["hello", "hello", "hello", "x;y", "x;y", "once"].iter().enumerate() {
+        let (string, value) = (0x2000 + 2 * i as u64, 0x2001 + 2 * i as u64);
+        let mut fields = b.id(value);
+        fields.push(0);
+        fields.extend(0u32.to_be_bytes());
+        b.instance(string, 0x1000, &fields).unwrap();
+        b.primitive_array_of(value, TYPE_BYTE, 1, text.as_bytes()).unwrap();
+        held.push(string);
+    }
+    b.object_array(0x3000, 0x1001, &held).unwrap();
+    b.instance(0x3001, 0x1002, &b.id(0x3000)).unwrap();
+    b.root(ROOT_JAVA_FRAME, 0x3001).unwrap();
+    b.finish().unwrap()
+}
+
+#[test]
+fn dups_names_the_duplicated_values_and_who_holds_them() {
+    let d = Dir::new("dups");
+    fs::write(d.path("strings.hprof"), strings_dump()).unwrap();
+    let o = d.jheap(&["strings.hprof", "dups"]);
+    assert_eq!(code(&o), 0, "{}", stderr(&o));
+    let text = stdout(&o);
+    assert!(text.contains("Duplicate Strings: 2 values in 5 copies"), "{text}");
+    assert!(text.contains("keeping one copy of each would save 144 B"), "{text}");
+    assert!(text.contains("\"hello\""), "{text}");
+    assert!(text.contains("3 copies, each with its own array; held by com.example.Cache 100%"), "{text}");
+    // the frame escapes the ; that separates the frames of a path
+    assert!(text.contains("\"x\\u003by\""), "{text}");
+    assert!(!text.contains("once"), "{text}");
+
+    let doc = json(&d.jheap(&["strings.hprof", "dups", "--json"]));
+    let keys: Vec<&String> = doc.as_object().unwrap().keys().collect();
+    assert_eq!(keys[..2], ["jheap", "command"]);
+    assert_eq!(doc["command"], "dups");
+    assert_eq!(doc["duplicates"]["values"], 2);
+    assert_eq!(doc["duplicates"]["copies"], 5);
+    assert_eq!(doc["duplicates"]["saving"], 144);
+    assert_eq!(doc["top"][0]["value"], "hello");
+    assert_eq!(doc["top"][0]["saving"], 96);
+    assert_eq!(doc["top"][0]["heldBy"][0]["class"], "com.example.Cache");
+    assert_eq!(doc["top"][1]["value"], "x;y");
+    assert_eq!(doc["more"], 0);
+
+    // a number of rows
+    let one = json(&d.jheap(&["strings.hprof", "dups", "1", "--json"]));
+    assert_eq!(one["top"].as_array().unwrap().len(), 1);
+    assert_eq!(one["more"], 1);
+    assert_eq!(one["moreSaving"], 48);
+}
+
+#[test]
+fn dups_keeps_no_text_beside_the_dump() {
+    let d = Dir::new("dups-keep");
+    fs::write(d.path("strings.hprof"), strings_dump()).unwrap();
+    let o = d.jheap(&["strings.hprof", "dups"]);
+    assert_eq!(code(&o), 0, "{}", stderr(&o));
+    // the usual parse is kept, which names classes and never a String's text
+    let kept = fs::read_to_string(d.path("strings.jheap.json")).expect("the parse is kept");
+    assert!(!kept.contains("hello"), "{kept}");
+    // and it is not read in place of the dump: the next dups still finds them
+    let o = d.jheap(&["strings.hprof", "dups", "--json"]);
+    assert_eq!(json(&o)["duplicates"]["values"], 2);
+    assert_eq!(json(&o)["dump"]["readFrom"], Value::Null);
+}
+
+#[test]
+fn dups_saves_the_profile_of_the_duplicates() {
+    let d = Dir::new("dups-save");
+    fs::write(d.path("strings.hprof"), strings_dump()).unwrap();
+    let o = d.jheap(&["strings.hprof", "dups", "--save", "dups.flamepack.json", "--no-keep"]);
+    assert_eq!(code(&o), 0, "{}", stderr(&o));
+    let doc: Value = serde_json::from_str(&fs::read_to_string(d.path("dups.flamepack.json")).unwrap()).unwrap();
+    assert_eq!(doc["version"], 5);
+    assert_eq!(doc["duplicates"], serde_json::json!({"count": 2, "copies": 5, "bytes": 240, "saving": 144, "named": 2}));
+    // the weights add up to what keeping one copy of each would save
+    let weights: f64 = doc["samples"]["weight"].as_array().unwrap().iter().map(|w| w.as_f64().unwrap()).sum();
+    assert_eq!(weights, 144.0);
+    let objects: f64 = doc["samples"]["objects"].as_array().unwrap().iter().map(|w| w.as_f64().unwrap()).sum();
+    assert_eq!(objects, 5.0);
+}
+
+#[test]
+fn dups_finds_nothing_where_no_string_repeats_and_needs_a_dump() {
+    let d = Dir::new("dups-none");
+    let o = d.jheap(&["static-holder.hprof", "dups"]);
+    assert_eq!(code(&o), 3, "{}", stderr(&o));
+    assert!(stdout(&o).contains("No String is held in several copies."), "{}", stdout(&o));
+    // no profile is saved of nothing
+    let o = d.jheap(&["static-holder.hprof", "dups", "--save", "none.json", "--no-keep"]);
+    assert!(stderr(&o).contains("no duplicate String"), "{}", stderr(&o));
+    assert!(!d.path("none.json").exists());
+
+    // a profile holds no value to compare
+    let o = d.jheap(&["server-after.hprof", "--save", "server.profile.json", "--no-keep"]);
+    assert_eq!(code(&o), 0, "{}", stderr(&o));
+    let o = d.jheap(&["server.profile.json", "dups"]);
+    assert_eq!(code(&o), 1);
+    assert!(stderr(&o).contains("is a profile: the duplicate Strings are found in the dump"), "{}", stderr(&o));
 }
 
 #[test]

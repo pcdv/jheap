@@ -10,12 +10,14 @@
 //! number of objects and references, not with the file.
 
 mod cursor;
+mod duplicates;
 mod graph;
 mod index;
 mod metadata;
 mod tags;
 mod walk;
 
+pub use duplicates::{Duplicates, Value};
 pub(crate) use tags::ROOT_NAMES;
 
 /// The revision of what a parse gives: raised with any change to the paths,
@@ -70,11 +72,15 @@ pub struct Options {
     /// default is the system's clock, and zero on wasm32, which has none: the
     /// web app passes its own.
     pub clock: fn() -> f64,
+    /// Find the Strings held in several copies. It reads the contents of
+    /// every `byte[]` and `char[]`, which the parse otherwise skips, and holds
+    /// about 16 bytes more for each String. The parse is the same either way.
+    pub duplicates: bool,
 }
 
 impl Default for Options {
     fn default() -> Self {
-        Options { pointers: None, chunk: CHUNK, name: "heap dump".into(), clock: system_clock }
+        Options { pointers: None, chunk: CHUNK, name: "heap dump".into(), clock: system_clock, duplicates: false }
     }
 }
 
@@ -100,6 +106,8 @@ pub enum Phase {
     Objects,
     /// The walk from the roots.
     Paths,
+    /// Grouping the Strings by value, when asked.
+    Duplicates,
 }
 
 impl Phase {
@@ -108,6 +116,7 @@ impl Phase {
             Phase::Metadata => "Reading strings and classes",
             Phase::Objects => "Reading objects",
             Phase::Paths => "Aggregating paths",
+            Phase::Duplicates => "Grouping strings by value",
         }
     }
 }
@@ -265,6 +274,8 @@ pub struct Parse {
     pub object_count: u64,
     /// The distinct names objects and roots have.
     pub frame_count: u64,
+    /// The Strings held in several copies, when [`Options::duplicates`] asks.
+    pub duplicates: Option<Duplicates>,
 }
 
 impl Parse {
@@ -317,11 +328,18 @@ pub fn parse<R: Read + Seek>(
 
     let objects_start = clock();
     progress(Phase::Objects, 0);
-    let mut g = graph::build_graph(&mut r, meta, &layout, options.chunk, &mut |p| progress(Phase::Objects, p))?;
+    let mut gather =
+        options.duplicates.then(|| duplicates::Gather::new(meta.string, meta.segments.clone(), meta.ids.len()));
+    let mut g = graph::build_graph(&mut r, meta, &layout, options.chunk, gather.as_mut(), &mut |p| {
+        progress(Phase::Objects, p)
+    })?;
     if g.defined == 0 {
         return Err(Error::Format(format!("{} has a heap dump with no object in it.", options.name)));
     }
     let objects_time_ms = clock() - objects_start;
+    let resolve_start = clock();
+    let resolved = gather.map(duplicates::Gather::resolve);
+    let resolve_ms = clock() - resolve_start;
 
     let graph_start = clock();
     progress(Phase::Paths, 0);
@@ -331,6 +349,18 @@ pub fn parse<R: Read + Seek>(
     let walked = walk::walk(&mut g, unreachable, &mut |p| progress(Phase::Paths, p));
     let graph_time_ms = clock() - graph_start;
     progress(Phase::Paths, 100);
+
+    let duplicates = match resolved {
+        Some(resolved) => {
+            let start = clock();
+            progress(Phase::Duplicates, 0);
+            let mut d = resolved.finish(&mut r, &g, &walked.tree, &walked.seen)?;
+            progress(Phase::Duplicates, 100);
+            d.time_ms = resolve_ms + clock() - start;
+            Some(d)
+        }
+        None => None,
+    };
 
     let names = std::mem::take(&mut g.names.list);
     let mut paths: Vec<Path> = walked
@@ -371,5 +401,5 @@ pub fn parse<R: Read + Seek>(
         reachable_size: walked.reachable_size,
         unreachable_size: walked.unreachable_size,
     };
-    Ok(Parse { names, paths, report, object_count: g.defined as u64, frame_count })
+    Ok(Parse { names, paths, report, object_count: g.defined as u64, frame_count, duplicates })
 }

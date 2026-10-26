@@ -3,6 +3,7 @@
 use std::io::{Read, Seek};
 
 use super::cursor::{Cursor, read_id};
+use super::duplicates::Gather;
 use super::index::IdIndex;
 use super::metadata::{Metadata, read_class, unknown_sub_record};
 use super::tags::*;
@@ -151,11 +152,14 @@ fn aligned(n: u64) -> u32 {
     n.div_ceil(8).min(u32::MAX as u64) as u32
 }
 
+/// The graph of the objects; `gather`, when the duplicates are asked for,
+/// takes the Strings and the hashes of the arrays that could be their values.
 pub(crate) fn build_graph<R: Read + Seek>(
     r: &mut Cursor<R>,
     meta: Metadata,
     layout: &Layout,
     chunk: usize,
+    mut gather: Option<&mut Gather>,
     progress: &mut dyn FnMut(u32),
 ) -> Result<Graph, Error> {
     let Metadata { classes, roots, segments, ids, .. } = meta;
@@ -202,10 +206,13 @@ pub(crate) fn build_graph<R: Read + Seek>(
     // The elements of an object array are read this many at a time: an array
     // longer than a chunk is streamed rather than held
     let per_piece = (chunk / id_size).max(1);
+    // and the contents of a primitive array hashed this many bytes at a time,
+    // whole words but the last
+    let hash_piece = (chunk & !7).max(8) as u64;
     let file_size = r.size().max(1);
     let mut rec = 0usize;
 
-    for &(start, length) in &segments {
+    for (segment, &(start, length)) in segments.iter().enumerate() {
         r.seek(start);
         let end = start + length;
         while r.offset() < end {
@@ -213,7 +220,13 @@ pub(crate) fn build_graph<R: Read + Seek>(
                 progress((100 * r.offset() / file_size) as u32);
             }
             r.need(1)?;
+            let at = r.offset();
             let sub = r.u1();
+            if let Some(g) = gather.as_deref_mut()
+                && matches!(sub, INSTANCE_DUMP | OBJECT_ARRAY_DUMP | PRIMITIVE_ARRAY_DUMP)
+            {
+                g.mark(rec, at, segment);
+            }
             match sub {
                 INSTANCE_DUMP => {
                     r.need(2 * id_size + 8)?;
@@ -237,6 +250,11 @@ pub(crate) fn build_graph<R: Read + Seek>(
                         if id != 0 {
                             refs.push(resolver.resolve(id));
                         }
+                    }
+                    if let Some(g) = gather.as_deref_mut()
+                        && g.is_string(class_id)
+                    {
+                        g.string(rec, bytes, id_size, |id| resolver.find(id));
                     }
                     r.skip(n as u64);
                     rec += 1;
@@ -281,8 +299,22 @@ pub(crate) fn build_graph<R: Read + Seek>(
                     frame[rec] = primitive_frames[t as usize];
                     size[rec] = aligned(layout.array_header + n * element);
                     offsets.set(rec, refs.len());
-                    // its contents hold no reference: never read
-                    r.skip(n * element);
+                    match gather.as_deref_mut() {
+                        Some(g) if g.hashes(t) => {
+                            let mut hasher = Gather::hasher(t);
+                            let mut left = n * element;
+                            while left > 0 {
+                                let m = left.min(hash_piece);
+                                r.need(m as usize)?;
+                                hasher.write(r.peek(m as usize));
+                                r.skip(m);
+                                left -= m;
+                            }
+                            g.array(rec, hasher.finish());
+                        }
+                        // its contents hold no reference: never read
+                        _ => r.skip(n * element),
+                    }
                     rec += 1;
                     primitive_array_count += 1;
                 }

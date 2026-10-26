@@ -71,6 +71,11 @@ impl<R: Read + Seek> Cursor<R> {
         self.at += n;
     }
 
+    /// Reads `chunk` bytes at a time from now on, and says how many it read.
+    pub(crate) fn set_chunk(&mut self, chunk: usize) -> usize {
+        std::mem::replace(&mut self.chunk, chunk.max(1))
+    }
+
     /// Whether the window moved since this was last asked.
     pub(crate) fn moved(&mut self) -> bool {
         std::mem::replace(&mut self.filled, false)

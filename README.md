@@ -6,6 +6,7 @@ What holds the memory of a JVM, from its heap dump.
 jheap heap.hprof                    # what holds the memory, and whether it could leak
 jheap heap.hprof leaks              # the leak suspects
 jheap diff before.hprof after.hprof # what grew between two dumps
+jheap heap.hprof dups               # the Strings held in several copies
 ```
 
 A single binary, no runtime to install: copy it next to the dump. It also runs in
@@ -31,6 +32,7 @@ comes first, and the dumps follow, the earlier one first.
 | `peaks [<n>]` | the `n` heaviest peaks (10): what each is made of, and who holds it, outward |
 | `leaks [<n>]` | what could grow: the leak suspects, each with a verdict |
 | `classes [<n>]` | the `n` heaviest classes (20): bytes, objects, average size |
+| `dups [<n>]` | the `n` most duplicated Strings (20): copies, what keeping one would save, who holds them |
 | `trace <class>` | what holds a class and what it holds; the full name, the simple one, or a part |
 | `diff <earlier> <later> [<n>]` | what grew between two dumps of a process, and whether it looks like a leak |
 | `info` | the dump and its parse: format, reference width, counts, roots, timings |
@@ -86,6 +88,46 @@ What an object holds is what the walk from the roots reached through it first: a
 spanning tree, not a dominator tree. Totals are exact, but an object held by
 several others is counted under one of them.
 
+### Duplicate Strings
+
+`dups` finds the Strings that hold the same value in several copies, which an
+application can share, intern or stop copying:
+
+```
+$ jheap server-after.hprof dups
+server-after.hprof: 618.7 KiB in 949 objects, 2.1% unreachable
+parsed in 2 ms
+
+Duplicate Strings: 2 values in 25 copies take 1.2 KiB; keeping one copy of each would save 1.1 KiB, 0.2% of the heap.
+
+    saves  share  value, to save
+    672 B   0.1%  "\u0000\u0000\u0000\u0000\u0000\u0000"
+                  15 copies, each with its own array; held by com.example.Cache 67%, com.example.Session 33%
+…
+```
+
+Two Strings are copies when their values are equal, told by a 64-bit hash of the
+contents of their `byte[]` or `char[]` (a JDK 8 heap has the latter), and their
+encoding. What keeping one copy would save is every String but one and every array
+but one: where copies already share an array, as G1's string deduplication leaves
+them, only the Strings are counted. A copy nothing reaches is garbage and left out.
+Each value is held by the innermost class of the application on the path of its
+copies.
+
+It reads the contents of every `byte[]` and `char[]`, which the other commands skip,
+so it parses the dump even when a parse is kept. On the 4.6 GB dump, whose
+`byte[]` hold 2.7 GiB, that is about a second more (5 s to 6 s) and 25 MiB more at
+the peak; in a heap of mostly small Strings, about 11 bytes more an object.
+
+`--save <file>` writes the profile of the duplicates, a Flamepack mountain-graph
+opens as a landscape: a peak a value, as high as what its copies waste, and its
+slopes the objects that hold them, out to the root.
+
+**The values are the application's data**: a token, a name, an identifier. The parse
+kept beside a dump never holds them (it names classes only). `dups` prints them,
+cut at 60 characters, and `--save` writes them into its profile: treat that file
+like the dump.
+
 ### Options
 
 | Option | |
@@ -95,7 +137,7 @@ several others is counted under one of them.
 | `--fresh` | parse again, even when a parse is kept beside the dump |
 | `--no-keep` | keep no parse beside the dump |
 | `--oops compressed\|wide` | the width of references, guessed from the heap's span (compressed under 32 GB) |
-| `--save <file>` | write the profile there too, as a Flamepack (`.flamepack.json`), for mountain-graph or jfr-web |
+| `--save <file>` | write the profile there too, as a Flamepack (`.flamepack.json`), for mountain-graph or jfr-web; with `dups`, the profile of the duplicates |
 | `--dir <path>` | look for the most recent dump there, not in the current directory |
 | `--stats` | parse again and say what it cost: time, and peak memory |
 | `--color auto\|always\|never` | colour on a terminal by default; `NO_COLOR` turns it off |
@@ -160,7 +202,7 @@ The exit code tells an answer from none:
 | 0 | found something |
 | 1 | it broke: a file it cannot read, a dump cut short |
 | 2 | called wrong, or no dump to take |
-| 3 | found nothing: no leak suspect, nothing grew, no class of the name traced |
+| 3 | found nothing: no leak suspect, nothing grew, no class of the name traced, no String in several copies |
 | 4 | the name traced is several classes': they are listed, to name one more fully |
 
 ## Installing

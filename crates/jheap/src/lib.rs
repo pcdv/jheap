@@ -11,5 +11,5 @@ pub mod hprof;
 pub mod model;
 pub mod profile;
 
-pub use hprof::{Error, Options, Parse, Path, Phase, Pointers, Report, parse};
+pub use hprof::{Duplicates, Error, Options, Parse, Path, Phase, Pointers, Report, parse};
 pub use profile::Profile;

@@ -7,7 +7,7 @@ pub mod document;
 use std::sync::OnceLock;
 
 use crate::hash::FxHashMap;
-use crate::hprof::Parse;
+use crate::hprof::{Duplicates, Parse, Path};
 
 /// The type of every frame of a heap profile, in a frame's low 3 bits.
 pub const COMPILED: u32 = 0;
@@ -105,10 +105,22 @@ impl Profile {
 
     /// The profile of a parse.
     pub fn from_parse(p: &Parse) -> Profile {
-        let stacks = p
-            .paths
+        Profile::from_paths(&p.names, &p.paths)
+    }
+
+    /// The profile of the duplicate Strings of a parse: their holders' paths,
+    /// then their values.
+    pub fn from_duplicates(d: &Duplicates) -> Profile {
+        Profile::from_paths(&d.names, &d.paths)
+    }
+
+    fn from_paths(names: &[String], paths: &[Path]) -> Profile {
+        let stacks = paths
             .iter()
-            .map(|path| (p.frames(path).collect::<Vec<_>>().join(";"), path.bytes as f64, path.objects as f64))
+            .map(|path| {
+                let frames: Vec<&str> = path.frames.iter().map(|&f| names[f as usize].as_str()).collect();
+                (frames.join(";"), path.bytes as f64, path.objects as f64)
+            })
             .collect();
         Profile::from_stacks(stacks, true)
     }

@@ -12,6 +12,8 @@ pub enum Command {
     Peaks,
     Leaks,
     Classes,
+    /// The Strings held in several copies.
+    Dups,
     /// A class, by its full name, its simple name or a part of either.
     Trace(String),
     Diff,
@@ -25,6 +27,7 @@ impl Command {
             Command::Peaks => "peaks",
             Command::Leaks => "leaks",
             Command::Classes => "classes",
+            Command::Dups => "dups",
             Command::Trace(_) => "trace",
             Command::Diff => "diff",
             Command::Info => "info",
@@ -32,7 +35,7 @@ impl Command {
     }
 }
 
-const COMMANDS: [&str; 6] = ["peaks", "leaks", "classes", "trace", "diff", "info"];
+const COMMANDS: [&str; 7] = ["peaks", "leaks", "classes", "dups", "trace", "diff", "info"];
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Color {
@@ -83,6 +86,9 @@ Commands:
   peaks [<n>]       the n heaviest peaks (10), what each is made of and who holds it
   leaks [<n>]       what could grow: the leak suspects, each with a verdict
   classes [<n>]     the n heaviest classes (20): bytes, objects, average size
+  dups [<n>]        the n most duplicated Strings (20): copies, what keeping one would
+                    save, who holds them. Reads the dump, which costs a little more
+                    time and memory, and shows the Strings' text
   trace <class>     what holds a class and what it holds; a full name, a simple
                     one, or a part of either
   diff <earlier> <later> [<n>]
@@ -95,7 +101,8 @@ Options:
   --fresh             parse again, even when a parse is kept beside the dump
   --no-keep           keep no parse beside the dump
   --oops <width>      compressed or wide references; guessed from the heap's span
-  --save <file>       write the profile there too, as a Flamepack (.flamepack.json)
+  --save <file>       write the profile there too, as a Flamepack (.flamepack.json); with
+                      dups, the profile of the duplicates, which holds the Strings' text
   --dir <path>        look for the most recent dump there, not here
   --stats             parse again and say what it cost: time and peak memory
   --color <when>      auto, always or never
@@ -229,6 +236,10 @@ pub fn parse(argv: Vec<OsString>) -> Result<Parsed, String> {
             args.rows = rows(&rest)?;
             Command::Classes
         }
+        "dups" => {
+            args.rows = rows(&rest)?;
+            Command::Dups
+        }
         "info" => {
             if !rest.is_empty() {
                 return Err(format!("info takes nothing more: not {}", rest.join(" ")));
@@ -291,6 +302,8 @@ mod tests {
         assert_eq!(a.command, Command::Trace("store.Store".into()));
         let a = run("heap.hprof leaks --share 5");
         assert!((a.share - 0.05).abs() < 1e-12);
+        let a = run("heap.hprof dups 5 --save dups.flamepack.json");
+        assert_eq!((a.command, a.rows, a.save), (Command::Dups, Some(5), Some(PathBuf::from("dups.flamepack.json"))));
     }
 
     #[test]

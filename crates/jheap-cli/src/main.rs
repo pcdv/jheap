@@ -67,6 +67,7 @@ fn run(args: &Args) -> ExitCode {
         fresh: args.fresh,
         keep: args.keep,
         save: args.save.clone(),
+        duplicates: args.command == Command::Dups,
         progress: true,
     };
     let mut loaded = Vec::new();
@@ -100,6 +101,7 @@ fn run(args: &Args) -> ExitCode {
         Command::Peaks => commands::peaks::run(&mut ctx, &loaded[0]),
         Command::Leaks => commands::leaks::run(&mut ctx, &loaded[0]),
         Command::Classes => commands::classes::run(&mut ctx, &loaded[0]),
+        Command::Dups => commands::dups::run(&mut ctx, &loaded[0]),
         Command::Trace(class) => commands::trace::run(&mut ctx, &loaded[0], class),
         Command::Info => commands::info::run(&mut ctx, &loaded[0]),
         Command::Diff => commands::diff::run(&mut ctx, &loaded[0], &loaded[1]),

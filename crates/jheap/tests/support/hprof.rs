@@ -6,6 +6,7 @@
 use std::io::{self, Write};
 
 pub const TYPE_OBJECT: u8 = 2;
+pub const TYPE_CHAR: u8 = 5;
 pub const TYPE_BYTE: u8 = 8;
 pub const TYPE_INT: u8 = 10;
 
@@ -123,6 +124,18 @@ impl<W: Write> Builder<W> {
         self.segment.extend(length.to_be_bytes());
         self.segment.push(t);
         self.segment.resize(self.segment.len() + length as usize * element_size, 0);
+        self.flush_if_full()
+    }
+
+    /// A primitive array with its elements, as the dump writes them: a
+    /// `char[]`'s big-endian.
+    pub fn primitive_array_of(&mut self, id: u64, t: u8, element_size: usize, elements: &[u8]) -> io::Result<()> {
+        self.segment.push(0x23);
+        self.push_id(id);
+        self.segment.extend(0u32.to_be_bytes());
+        self.segment.extend(((elements.len() / element_size) as u32).to_be_bytes());
+        self.segment.push(t);
+        self.segment.extend_from_slice(elements);
         self.flush_if_full()
     }
 

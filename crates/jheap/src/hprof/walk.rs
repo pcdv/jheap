@@ -19,6 +19,11 @@ pub(crate) struct Walked {
     pub(crate) unreachable_size: u64,
     pub(crate) max_depth_reached: u64,
     pub(crate) depth_limit_hits: u64,
+    /// The tree of paths, whose node each reached object has in place of its
+    /// frame: the duplicates read where their copies are held from it.
+    pub(crate) tree: Tree,
+    /// The objects reached, a bit each.
+    pub(crate) seen: Vec<u64>,
 }
 
 /// The tree of paths: a node per (parent, frame), so that objects which share
@@ -29,7 +34,7 @@ pub(crate) struct Walked {
 /// path: chains that end the same way share it, so a linked list of a million
 /// is a few dozen nodes rather than a million.
 #[derive(Default)]
-struct Tree {
+pub(crate) struct Tree {
     parent: Vec<u32>,
     frame: Vec<u32>,
     /// In frames from the root type, PATH_CAP for a window.
@@ -66,7 +71,7 @@ impl Tree {
         frames
     }
 
-    fn frames_of(&self, node: u32) -> Box<[u32]> {
+    pub(crate) fn frames_of(&self, node: u32) -> Box<[u32]> {
         match self.window_of.get(&node) {
             Some(window) => window.clone(),
             None => self.path_of(node).into_boxed_slice(),
@@ -221,5 +226,7 @@ pub(crate) fn walk(g: &mut Graph, unreachable: u32, progress: &mut dyn FnMut(u32
         unreachable_size,
         max_depth_reached,
         depth_limit_hits,
+        tree,
+        seen,
     }
 }

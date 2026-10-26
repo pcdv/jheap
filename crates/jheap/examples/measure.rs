@@ -2,8 +2,10 @@
 //!
 //! ```sh
 //! cargo run --release --example measure -- generate big.hprof 20000000 [--shuffled]
-//! cargo run --release --example measure -- parse big.hprof
+//! cargo run --release --example measure -- parse big.hprof [--dups]
 //! ```
+//!
+//! `--dups` finds the duplicate Strings too, and says what that cost.
 //!
 //! The heap is shaped like a server's: groups of map entries, each with a
 //! string key and a byte array value, some chained, held by an array that a
@@ -34,9 +36,9 @@ fn main() {
             let objects: u64 = args[2].parse().expect("an object count");
             generate(&args[1], objects, args.iter().any(|a| a == "--shuffled")).unwrap();
         }
-        Some("parse") => measure(&args[1]),
+        Some("parse") => measure(&args[1], args.iter().any(|a| a == "--dups")),
         _ => {
-            eprintln!("measure generate <dump> <objects> [--shuffled] | measure parse <dump>");
+            eprintln!("measure generate <dump> <objects> [--shuffled] | measure parse <dump> [--dups]");
             std::process::exit(2);
         }
     }
@@ -103,9 +105,9 @@ fn generate(path: &str, objects: u64, shuffled: bool) -> std::io::Result<()> {
     Ok(())
 }
 
-fn measure(path: &str) {
+fn measure(path: &str, duplicates: bool) {
     let start = Instant::now();
-    let options = Options { name: path.to_string(), ..Options::default() };
+    let options = Options { name: path.to_string(), duplicates, ..Options::default() };
     let p = parse(File::open(path).unwrap(), &options, &mut |_, _| {}).unwrap();
     let elapsed = start.elapsed();
     let r = &p.report;
@@ -118,4 +120,12 @@ fn measure(path: &str) {
     println!("peak working set {:.0} MiB, peak private {:.0} MiB: {:.1} bytes an object",
              peak_set as f64 / (1 << 20) as f64, peak_private as f64 / (1 << 20) as f64,
              peak_private as f64 / objects);
+    if let Some(d) = &p.duplicates {
+        let mib = |b: u64| b as f64 / (1 << 20) as f64;
+        println!("{} values in {} copies: {:.1} MiB, {:.1} MiB to save; grouped in {:.0} ms, {} paths",
+                 d.count, d.copies, mib(d.bytes), mib(d.saving), d.time_ms, d.paths.len());
+        for v in d.values.iter().take(10) {
+            println!("  {:>8.1} KiB  {:>8} copies  {:>6} chars", v.saving as f64 / 1024.0, v.copies, v.length);
+        }
+    }
 }

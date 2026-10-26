@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use jheap::profile::document::Document;
-use jheap::{Options, Phase, Pointers, Profile, Report};
+use jheap::{Duplicates, Options, Phase, Pointers, Profile, Report};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -28,6 +28,8 @@ pub struct Loaded {
     pub is_profile: bool,
     /// Milliseconds spent unzipping, not counted in the parse.
     pub unzip_ms: f64,
+    /// The Strings held in several copies, when they were asked for.
+    pub duplicates: Option<Duplicates>,
 }
 
 pub struct LoadOptions {
@@ -35,6 +37,9 @@ pub struct LoadOptions {
     pub fresh: bool,
     pub keep: bool,
     pub save: Option<PathBuf>,
+    /// Find the duplicate Strings: the dump is parsed, whatever is kept beside
+    /// it, as the parse kept holds none of their values.
+    pub duplicates: bool,
     /// Progress on stderr, where a terminal shows it.
     pub progress: bool,
 }
@@ -86,6 +91,29 @@ struct KeptHeap<'a> {
     report: &'a Report,
 }
 
+/// The profile of the duplicates, saved with --save: a Flamepack, with what
+/// mountain-graph says of it in its header. It holds the Strings' text, the
+/// application's data, which the parse kept beside a dump never does.
+#[derive(Serialize)]
+struct SavedDuplicates<'a> {
+    #[serde(flatten)]
+    document: &'a Document,
+    duplicates: DuplicatesSummary,
+}
+
+#[derive(Serialize)]
+struct DuplicatesSummary {
+    /// Values held in more than one copy, those not named included.
+    count: u64,
+    copies: u64,
+    /// Bytes of the copies.
+    bytes: u64,
+    /// Bytes keeping one copy of each would save: the profile's weights add up to it.
+    saving: u64,
+    /// The values the profile names; the others share a frame.
+    named: usize,
+}
+
 /// Where the parse of a dump is kept: beside it, named as MAT names its
 /// indexes, the dump's name without `.hprof` or `.hprof.gz`.
 pub fn kept_path_of(dump: &Path) -> PathBuf {
@@ -114,6 +142,12 @@ pub fn load(path: &Path, o: &LoadOptions) -> Result<Loaded, String> {
     let head = &head[..n];
 
     if head.iter().find(|b| !b.is_ascii_whitespace()) == Some(&b'{') {
+        if o.duplicates {
+            return Err(format!(
+                "{} is a profile: the duplicate Strings are found in the dump, as a profile holds none of their values",
+                path.display()
+            ));
+        }
         let loaded = read_profile(path)?;
         if o.save.is_some() {
             eprintln!("jheap: --save is for a dump: {} is a profile already", path.display());
@@ -135,6 +169,7 @@ pub fn load(path: &Path, o: &LoadOptions) -> Result<Loaded, String> {
     };
     let kept_path = kept_path_of(path);
     if !o.fresh
+        && !o.duplicates
         && let Some(loaded) = read_kept(&kept_path, &key, path)
     {
         if let Some(save) = &o.save {
@@ -143,10 +178,15 @@ pub fn load(path: &Path, o: &LoadOptions) -> Result<Loaded, String> {
         return Ok(loaded);
     }
 
-    let (profile, report, unzip_ms) = parse_dump(path, gzipped, o)?;
+    let (profile, report, duplicates, unzip_ms) = parse_dump(path, gzipped, o)?;
     if let Some(save) = &o.save {
-        save_profile(&profile, save)?;
+        match &duplicates {
+            Some(d) if d.paths.is_empty() => eprintln!("jheap: no duplicate String, so no profile of them is saved"),
+            Some(d) => save_duplicates(d, save)?,
+            None => save_profile(&profile, save)?,
+        }
     }
+    // the parse kept is the heap's, whichever command asked: it holds no String's text
     let kept_at = if o.keep { keep(&kept_path, &key, &profile, &report) } else { None };
     Ok(Loaded {
         path: path.to_path_buf(),
@@ -156,6 +196,7 @@ pub fn load(path: &Path, o: &LoadOptions) -> Result<Loaded, String> {
         kept_at,
         is_profile: false,
         unzip_ms,
+        duplicates,
     })
 }
 
@@ -183,6 +224,7 @@ fn read_profile(path: &Path) -> Result<Loaded, String> {
         kept_at: None,
         is_profile: true,
         unzip_ms: 0.0,
+        duplicates: None,
     })
 }
 
@@ -205,6 +247,7 @@ fn read_kept(kept: &Path, key: &Key, dump: &Path) -> Option<Loaded> {
         kept_at: None,
         is_profile: false,
         unzip_ms: 0.0,
+        duplicates: None,
     })
 }
 
@@ -243,6 +286,27 @@ fn save_profile(profile: &Profile, path: &Path) -> Result<(), String> {
         .map_err(|e| format!("cannot save the profile to {}: {e}", path.display()))
 }
 
+fn save_duplicates(d: &Duplicates, path: &Path) -> Result<(), String> {
+    let document = Document::of(&Profile::from_duplicates(d));
+    let saved = SavedDuplicates {
+        document: &document,
+        duplicates: DuplicatesSummary {
+            count: d.count,
+            copies: d.copies,
+            bytes: d.bytes,
+            saving: d.saving,
+            named: d.values.len(),
+        },
+    };
+    File::create(path)
+        .and_then(|f| {
+            let mut w = io::BufWriter::new(f);
+            serde_json::to_writer(&mut w, &saved).map_err(io::Error::other)?;
+            w.flush()
+        })
+        .map_err(|e| format!("cannot save the profile to {}: {e}", path.display()))
+}
+
 /// A file removed when dropped, however the command ends.
 struct Scratch(PathBuf);
 
@@ -274,7 +338,11 @@ fn sweep(dir: &Path) {
     }
 }
 
-fn parse_dump(path: &Path, gzipped: bool, o: &LoadOptions) -> Result<(Profile, Report, f64), String> {
+fn parse_dump(
+    path: &Path,
+    gzipped: bool,
+    o: &LoadOptions,
+) -> Result<(Profile, Report, Option<Duplicates>, f64), String> {
     // The parser seeks, and a gzip stream cannot be seeked: it is unzipped to
     // a temporary file first, disk rather than memory
     let show = o.progress && io::stderr().is_terminal();
@@ -309,6 +377,7 @@ fn parse_dump(path: &Path, gzipped: bool, o: &LoadOptions) -> Result<(Profile, R
     let options = Options {
         pointers: o.oops,
         name: path.display().to_string(),
+        duplicates: o.duplicates,
         ..Options::default()
     };
     let mut last = (Phase::Metadata, u32::MAX);
@@ -329,7 +398,7 @@ fn parse_dump(path: &Path, gzipped: bool, o: &LoadOptions) -> Result<(Profile, R
         jheap::Error::Format(m) => format!("{}: {m}", path.display()),
     })?;
     let profile = Profile::from_parse(&parsed);
-    Ok((profile, parsed.report, unzip_ms))
+    Ok((profile, parsed.report, parsed.duplicates, unzip_ms))
 }
 
 /// How the dump was read, in a line: parsed, or read from its kept parse.

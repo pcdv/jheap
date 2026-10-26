@@ -23,6 +23,18 @@ pub(crate) struct Class {
     pub(crate) constants: Vec<u64>,
     /// The types of its own instance fields, in the order they are written.
     pub(crate) fields: Vec<u8>,
+    /// The names of those fields, as string ids.
+    pub(crate) field_names: Vec<u64>,
+}
+
+/// Where a String's value and coder are in its field bytes: the duplicates
+/// read both, and only the names of String's fields say which is which.
+#[derive(Clone, Copy)]
+pub(crate) struct StringClass {
+    pub(crate) id: u64,
+    pub(crate) value_at: u32,
+    /// None before JDK 9, whose Strings hold a `char[]`.
+    pub(crate) coder_at: Option<u32>,
 }
 
 /// The classes in the order the dump first describes them. A class described
@@ -70,6 +82,8 @@ pub(crate) struct Metadata {
     /// The id of every object record, in the order written: an object's index
     /// in the graph is its place here.
     pub(crate) ids: Blocks<u64>,
+    /// None when the dump has no java.lang.String, or one without a value.
+    pub(crate) string: Option<StringClass>,
 }
 
 /// The lowest and the highest object id seen, and how many objects went by.
@@ -226,6 +240,7 @@ pub(crate) fn read_metadata<R: Read + Seek>(
         }
     }
 
+    let string = string_class(&classes, &strings, id_size);
     Ok(Metadata {
         version,
         id_size,
@@ -235,7 +250,24 @@ pub(crate) fn read_metadata<R: Read + Seek>(
         segments,
         heap_span: span.high.saturating_sub(span.low),
         ids,
+        string,
     })
+}
+
+fn string_class(classes: &Classes, strings: &FxHashMap<u64, String>, id_size: usize) -> Option<StringClass> {
+    let class = classes.list.iter().find(|c| c.name == "java.lang.String")?;
+    // String's own fields are written first, and java.lang.Object above it
+    // has none: they are all its instances have
+    let (mut at, mut value_at, mut coder_at) = (0u64, None, None);
+    for (&t, name) in class.fields.iter().zip(&class.field_names) {
+        match strings.get(name).map(String::as_str) {
+            Some("value") if t == TYPE_OBJECT => value_at = Some(at as u32),
+            Some("coder") if t == TYPE_BYTE => coder_at = Some(at as u32),
+            _ => {}
+        }
+        at += if t == TYPE_OBJECT { id_size as u64 } else { type_size(t) };
+    }
+    Some(StringClass { id: class.id, value_at: value_at?, coder_at })
 }
 
 /// The version, the width of ids, and where the records start.
@@ -328,9 +360,10 @@ pub(crate) fn read_class<R: Read + Seek>(r: &mut Cursor<R>) -> Result<Class, Err
     r.need(2)?;
     let count = r.u2();
     let mut fields = Vec::with_capacity(count as usize);
+    let mut field_names = Vec::with_capacity(count as usize);
     for _ in 0..count {
         r.need(id_size + 1)?;
-        r.skip(id_size as u64); // name
+        field_names.push(r.id());
         fields.push(r.u1());
     }
 
@@ -344,5 +377,6 @@ pub(crate) fn read_class<R: Read + Seek>(r: &mut Cursor<R>) -> Result<Class, Err
         statics,
         constants,
         fields,
+        field_names,
     })
 }
