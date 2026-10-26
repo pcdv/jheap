@@ -217,9 +217,9 @@ fn a_saved_profile_is_read_as_the_dump_was() {
     let from_profile = json(&d.jheap(&["server.profile.json", "leaks", "--json"]));
     assert_eq!(from_dump["suspects"], from_profile["suspects"]);
     assert_eq!(from_profile["dump"]["profile"], true);
-    // the saved profile is jfr-web's version 4, which mountain-graph reads
+    // the saved profile is Flamepack's version 5, which mountain-graph and jfr-web read
     let doc: Value = serde_json::from_str(&fs::read_to_string(d.path("server.profile.json")).unwrap()).unwrap();
-    assert_eq!(doc["version"], 4);
+    assert_eq!(doc["version"], 5);
     assert!(doc["samples"]["objects"].is_array());
 }
 

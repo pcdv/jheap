@@ -194,7 +194,7 @@ mod tests {
         });
         let options = Options { chunk: 4096, ..Options::default() };
         let answer: serde_json::Value = serde_json::from_str(&parse_to_json(source, &options, &mut |_, _| {})).unwrap();
-        assert_eq!(answer["doc"]["version"], 4);
+        assert_eq!(answer["doc"]["version"], 5);
         assert_eq!(answer["report"]["totalSize"], 633536);
         assert_eq!(answer["report"]["pointers"], "compressed");
         // read in slices, never whole

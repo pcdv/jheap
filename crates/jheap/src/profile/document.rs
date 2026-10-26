@@ -1,76 +1,64 @@
-//! A profile as a Flamepack document (version 4, specified in
+//! A profile as a Flamepack document (specified in
 //! https://github.com/pcdv/flamepack), which jfr-web's and mountain-graph's
 //! pages read: strings sorted and front-coded, stack nodes depth first, a
-//! sample per path. A heap profile has no time: its
-//! samples are all at 0 and its weights are bytes. It has one column
-//! jfr-web's have not, `samples.objects`, the objects of each sample, which
-//! jfr-web ignores.
+//! sample per path. Written as version 5, which leaves out what a heap has
+//! not (time, threads, operations, the weights a column of bytes replaces);
+//! version 4, which jheap wrote until then, is read as well.
+//!
+//! A heap profile's samples are written sorted by stack, each stack as the
+//! difference with the last, which costs almost nothing once compressed. The
+//! column `samples.objects`, the objects of each sample, is a heap's own.
 
 use serde::{Deserialize, Serialize};
 
 use super::Profile;
 
-/// The version of jfr-web's format.
-pub const VERSION: u32 = 4;
+/// The version of the format that is written.
+pub const VERSION: u32 = 5;
 
-/// The name of the one thread of a heap profile.
-const THREAD: &str = "all";
+/// The version before it, which is read.
+const PREVIOUS: u32 = 4;
 
 #[derive(Serialize, Deserialize)]
 pub struct Document {
     pub version: u32,
     pub unit: String,
-    pub weights: Vec<f64>,
-    pub start: String,
-    pub end: f64,
+    /// Version 4 always had them: the weight of a sample is `weights[kind]`
+    /// when it has no `weight`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub weights: Option<Vec<f64>>,
     pub strings: Vec<String>,
-    /// Depth and frame of each node, depth first.
-    pub stacks: Vec<i64>,
+    pub stacks: Stacks,
     pub samples: Samples,
-    /// Name and id of each thread.
-    pub threads: Vec<(i64, i64)>,
-    pub operations: Operations,
+}
+
+/// The nodes of the stack tree, depth first.
+#[derive(Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Stacks {
+    /// Version 5: a column each. The type of a frame, in its low 3 bits, is
+    /// left out when all are 0.
+    Columns {
+        depth: Vec<i64>,
+        name: Vec<i64>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        r#type: Option<Vec<u8>>,
+    },
+    /// Version 4: the depth and the frame of each node, one after the other.
+    Pairs(Vec<i64>),
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Samples {
-    pub time: Vec<f64>,
+    /// Version 5: the node of each sample plus 1, 0 for none, as the
+    /// difference with the last. Version 4: the node, -1 for none.
     pub stack: Vec<i64>,
-    pub thread: Vec<i64>,
-    pub operation: Vec<i64>,
-    pub kind: Vec<u8>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kind: Option<Vec<u8>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub weight: Option<Vec<f64>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub objects: Option<Vec<f64>>,
-}
-
-/// A heap profile has none: the fields are there for jfr-web's pages.
-#[derive(Serialize, Deserialize, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct Operations {
-    #[serde(default)]
-    pub name: Vec<i64>,
-    #[serde(default)]
-    pub start: Vec<f64>,
-    #[serde(default)]
-    pub duration: Vec<f64>,
-    #[serde(default)]
-    pub thread: Vec<i64>,
-    #[serde(default)]
-    pub detail: Vec<i64>,
-    #[serde(default)]
-    pub status: Vec<i64>,
-    #[serde(default)]
-    pub failed: Vec<u8>,
-    #[serde(default)]
-    pub error: Vec<i64>,
-    #[serde(default)]
-    pub r#async: Vec<u8>,
-    #[serde(default)]
-    pub bytes_in: Vec<f64>,
-    #[serde(default)]
-    pub bytes_out: Vec<f64>,
 }
 
 /// The UTF-16 units of a string: front coding counts them, as JavaScript does.
@@ -83,7 +71,6 @@ impl Document {
     pub fn of(p: &Profile) -> Document {
         // names sorted, for their front coding, as JavaScript sorts: by UTF-16 unit
         let mut names: Vec<&str> = p.frame.iter().map(|&f| p.strings[(f >> 3) as usize].as_str()).collect();
-        names.push(THREAD);
         names.sort_by(|a, b| a.encode_utf16().cmp(b.encode_utf16()));
         names.dedup();
         let rank: std::collections::HashMap<&str, usize> = names.iter().enumerate().map(|(i, &s)| (s, i)).collect();
@@ -122,41 +109,54 @@ impl Document {
             order.push(node);
             stack.extend(s.children[node].iter().rev());
         }
-        let mut stacks = Vec::with_capacity(2 * n);
+        let mut stack_depth = Vec::with_capacity(n);
+        let mut stack_name = Vec::with_capacity(n);
+        let mut stack_type = Vec::with_capacity(n);
         for &node in &order {
             let frame = p.frame[node];
-            let name = rank[p.strings[(frame >> 3) as usize].as_str()] as i64;
-            stacks.push(depth[node]);
-            stacks.push(name << 3 | (frame & 7) as i64);
+            stack_depth.push(depth[node]);
+            stack_name.push(rank[p.strings[(frame >> 3) as usize].as_str()] as i64);
+            stack_type.push((frame & 7) as u8);
         }
 
-        let samples = p.stack.len();
+        // by stack, the samples with none first: the node plus 1, as a difference
+        let at = |i: usize| if p.stack[i] < 0 { 0 } else { position[p.stack[i] as usize] + 1 };
+        let mut sample: Vec<usize> = (0..p.stack.len()).collect();
+        sample.sort_by_key(|&i| at(i));
+        let mut last = 0;
+        let differences = sample
+            .iter()
+            .map(|&i| {
+                let next = at(i);
+                let d = next - last;
+                last = next;
+                d
+            })
+            .collect();
+
         Document {
             version: VERSION,
             unit: "bytes".into(),
-            weights: vec![1.0, 1.0],
-            start: String::new(),
-            end: 0.0,
+            weights: None,
             strings,
-            stacks,
-            samples: Samples {
-                time: vec![0.0; samples],
-                stack: p.stack.iter().map(|&node| if node < 0 { -1 } else { position[node as usize] }).collect(),
-                thread: vec![0; samples],
-                operation: vec![-1; samples],
-                kind: vec![0; samples],
-                weight: Some(p.weight.clone()),
-                objects: p.objects.clone(),
+            stacks: Stacks::Columns {
+                depth: stack_depth,
+                name: stack_name,
+                r#type: stack_type.iter().any(|&t| t != 0).then_some(stack_type),
             },
-            threads: vec![(rank[THREAD] as i64, 0)],
-            operations: Operations::default(),
+            samples: Samples {
+                stack: differences,
+                kind: None,
+                weight: Some(sample.iter().map(|&i| p.weight[i]).collect()),
+                objects: p.objects.as_ref().map(|o| sample.iter().map(|&i| o[i]).collect()),
+            },
         }
     }
 
-    /// The profile of a document.
+    /// The profile of a document, of version 5 or 4.
     pub fn profile(&self) -> Result<Profile, String> {
-        if self.version != VERSION {
-            return Err(format!("a profile of version {}, where version {VERSION} is read", self.version));
+        if self.version != VERSION && self.version != PREVIOUS {
+            return Err(format!("a profile of version {}, where versions {PREVIOUS} and {VERSION} are read", self.version));
         }
         // front-coded: the first character tells the length, in UTF-16 units,
         // of the prefix shared with the previous string
@@ -173,15 +173,28 @@ impl Document {
         }
 
         // depth first: a node's parent is the last node one level up
-        let n = self.stacks.len() / 2;
+        let (depths, frames): (Vec<i64>, Vec<i64>) = match (&self.stacks, self.version) {
+            (Stacks::Columns { depth, name, r#type }, VERSION) => {
+                if depth.len() != name.len() || r#type.as_ref().is_some_and(|t| t.len() != depth.len()) {
+                    return Err("the stacks' columns are not of one length".into());
+                }
+                let frames = name.iter().enumerate().map(|(i, &n)| n << 3 | r#type.as_ref().map_or(0, |t| t[i] as i64));
+                (depth.clone(), frames.collect())
+            }
+            (Stacks::Pairs(pairs), PREVIOUS) => {
+                (pairs.chunks_exact(2).map(|c| c[0]).collect(), pairs.chunks_exact(2).map(|c| c[1]).collect())
+            }
+            _ => return Err(format!("the stacks are not written as version {} writes them", self.version)),
+        };
+        let n = depths.len();
         let (mut parent, mut frame) = (Vec::with_capacity(n), Vec::with_capacity(n));
         let mut last: Vec<i32> = Vec::new();
         for i in 0..n {
-            let depth = self.stacks[2 * i] as usize;
-            if depth > last.len() {
-                return Err(format!("node {i} is {depth} deep, under no node {} deep", depth - 1));
+            let depth = depths[i] as usize;
+            if depths[i] < 0 || depth > last.len() {
+                return Err(format!("node {i} is {} deep, under no node {} deep", depths[i], depths[i] - 1));
             }
-            let f = self.stacks[2 * i + 1];
+            let f = frames[i];
             if f < 0 || (f >> 3) as usize >= strings.len() {
                 return Err(format!("node {i} names no string of the profile"));
             }
@@ -192,10 +205,30 @@ impl Document {
         }
 
         let samples = &self.samples;
-        let stack: Vec<i32> = samples.stack.iter().map(|&s| if s < 0 || s as usize >= n { -1 } else { s as i32 }).collect();
+        let mut sum = 0;
+        let stack: Vec<i32> = samples
+            .stack
+            .iter()
+            .map(|&s| {
+                let node = if self.version == VERSION {
+                    sum += s;
+                    sum - 1
+                } else {
+                    s
+                };
+                if node < 0 || node as usize >= n { -1 } else { node as i32 }
+            })
+            .collect();
         let weight = match &samples.weight {
             Some(w) => w.clone(),
-            None => samples.kind.iter().map(|&k| self.weights.get(k as usize).copied().unwrap_or(0.0)).collect(),
+            None => {
+                let weights = self.weights.clone().unwrap_or_else(|| vec![1.0]);
+                let weight = |k: u8| weights.get(k as usize).copied().unwrap_or(0.0);
+                match &samples.kind {
+                    Some(kind) => kind.iter().map(|&k| weight(k)).collect(),
+                    None => vec![weight(0); stack.len()],
+                }
+            }
         };
         if weight.len() != stack.len() || samples.objects.as_ref().is_some_and(|o| o.len() != stack.len()) {
             return Err("the samples' columns are not of one length".into());
@@ -208,31 +241,104 @@ impl Document {
 mod tests {
     use super::*;
 
-    #[test]
-    fn a_profile_survives_its_document() {
-        let p = Profile::from_stacks(
+    /// The type of a frame that stands for no class.
+    const SYNTHETIC: u32 = 4;
+
+    fn profile() -> Profile {
+        Profile::from_stacks(
             vec![
                 ("Java Frame;com.example.Server;byte[]".into(), 100.0, 1.0),
                 ("Java Frame;com.example.Server".into(), 16.0, 1.0),
                 ("System Class;com.example.Café;😀[]".into(), 24.0, 2.0),
             ],
             true,
-        );
-        let doc = Document::of(&p);
-        let text = serde_json::to_string(&doc).unwrap();
-        let back: Document = serde_json::from_str(&text).unwrap();
-        let q = back.profile().unwrap();
-        let paths = |p: &Profile| {
-            let mut v: Vec<(Vec<String>, f64, f64)> = p
-                .stack
-                .iter()
-                .enumerate()
-                .map(|(i, &n)| (p.path_of(n as usize), p.weight[i], p.objects.as_ref().unwrap()[i]))
-                .collect();
-            v.sort_by(|a, b| a.0.cmp(&b.0));
-            v
-        };
+        )
+    }
+
+    fn paths(p: &Profile) -> Vec<(Vec<String>, f64, f64)> {
+        let mut v: Vec<(Vec<String>, f64, f64)> = p
+            .stack
+            .iter()
+            .enumerate()
+            .map(|(i, &n)| (p.path_of(n as usize), p.weight[i], p.objects.as_ref().unwrap()[i]))
+            .collect();
+        v.sort_by(|a, b| a.0.cmp(&b.0));
+        v
+    }
+
+    #[test]
+    fn a_profile_survives_its_document() {
+        let p = profile();
+        let text = serde_json::to_string(&Document::of(&p)).unwrap();
+        let q = serde_json::from_str::<Document>(&text).unwrap().profile().unwrap();
+
         assert_eq!(paths(&p), paths(&q));
         assert_eq!(q.heap(), 140.0);
+    }
+
+    #[test]
+    fn version_5_leaves_out_what_a_heap_has_not() {
+        let value = serde_json::to_value(Document::of(&profile())).unwrap();
+        let members: Vec<&String> = value.as_object().unwrap().keys().collect();
+
+        assert_eq!(value["version"], 5);
+        assert_eq!(value["unit"], "bytes");
+        assert_eq!(members.len(), 5, "{members:?}");
+        assert_eq!(value["stacks"].as_object().unwrap().keys().collect::<Vec<_>>(), ["depth", "name"]);
+        let samples = value["samples"].as_object().unwrap();
+        let mut keys: Vec<&String> = samples.keys().collect();
+        keys.sort();
+        assert_eq!(keys, ["objects", "stack", "weight"]);
+    }
+
+    #[test]
+    fn the_samples_are_sorted_by_stack_and_written_as_differences() {
+        let value = serde_json::to_value(Document::of(&profile())).unwrap();
+        let stack: Vec<i64> = value["samples"]["stack"].as_array().unwrap().iter().map(|v| v.as_i64().unwrap()).collect();
+
+        assert_eq!(stack.len(), 3);
+        assert!(stack.iter().all(|&d| d >= 0), "{stack:?}");
+    }
+
+    #[test]
+    fn a_frame_that_is_not_compiled_has_its_type_written() {
+        let mut p = profile();
+        p.frame[0] |= SYNTHETIC;
+        let value = serde_json::to_value(Document::of(&p)).unwrap();
+
+        assert!(value["stacks"]["type"].as_array().unwrap().iter().any(|t| t == SYNTHETIC));
+    }
+
+    #[test]
+    fn version_4_is_read_as_well() {
+        let text = r#"{"version": 4, "unit": "bytes", "weights": [1, 1], "start": "", "end": 0,
+            "strings": [" Java Frame", " Server", " byte[]"],
+            "stacks": [0, 0, 1, 8, 2, 16],
+            "samples": {"time": [0, 0], "stack": [1, 2], "thread": [0, 0], "operation": [-1, -1],
+                        "kind": [0, 0], "weight": [16, 100]},
+            "threads": [[0, 0]], "operations": {"name": []}}"#;
+        let p = serde_json::from_str::<Document>(text).unwrap().profile().unwrap();
+
+        assert_eq!(p.stack.len(), 2);
+        assert_eq!(p.path_of(p.stack[1] as usize), ["Java Frame", "Server", "byte[]"]);
+        assert_eq!(p.weight, [16.0, 100.0]);
+    }
+
+    #[test]
+    fn another_version_is_refused() {
+        let text = r#"{"version": 6, "unit": "bytes", "strings": [], "stacks": {"depth": [], "name": []},
+            "samples": {"stack": []}}"#;
+        let error = serde_json::from_str::<Document>(text).unwrap().profile().err().unwrap();
+
+        assert!(error.contains("version 6"), "{error}");
+    }
+
+    #[test]
+    fn a_column_of_another_length_is_refused() {
+        let text = r#"{"version": 5, "unit": "bytes", "strings": [" a"], "stacks": {"depth": [0], "name": [0]},
+            "samples": {"stack": [1, 0], "weight": [3]}}"#;
+        let error = serde_json::from_str::<Document>(text).unwrap().profile().err().unwrap();
+
+        assert!(error.contains("one length"), "{error}");
     }
 }
