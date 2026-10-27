@@ -27,9 +27,18 @@ pub struct Document {
     /// when it has no `weight`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub weights: Option<Vec<f64>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub meta: Option<Meta>,
     pub strings: Vec<String>,
     pub stacks: Stacks,
     pub samples: Samples,
+}
+
+/// What the document says about the profile: the kind of it, which names files.
+#[derive(Serialize, Deserialize)]
+pub struct Meta {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub kind: Option<String>,
 }
 
 /// The nodes of the stack tree, depth first.
@@ -138,6 +147,7 @@ impl Document {
             version: VERSION,
             unit: "bytes".into(),
             weights: None,
+            meta: Some(Meta { kind: Some("heap".into()) }),
             strings,
             stacks: Stacks::Columns {
                 depth: stack_depth,
@@ -283,7 +293,8 @@ mod tests {
 
         assert_eq!(value["version"], 5);
         assert_eq!(value["unit"], "bytes");
-        assert_eq!(members.len(), 5, "{members:?}");
+        assert_eq!(members.len(), 6, "{members:?}");
+        assert_eq!(value["meta"]["kind"], "heap");
         assert_eq!(value["stacks"].as_object().unwrap().keys().collect::<Vec<_>>(), ["depth", "name"]);
         let samples = value["samples"].as_object().unwrap();
         let mut keys: Vec<&String> = samples.keys().collect();

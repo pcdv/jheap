@@ -137,7 +137,7 @@ like the dump.
 | `--fresh` | parse again, even when a parse is kept beside the dump |
 | `--no-keep` | keep no parse beside the dump |
 | `--oops compressed\|wide` | the width of references, guessed from the heap's span (compressed under 32 GB) |
-| `--save <file>` | write the profile there too, as a Flamepack (`.flamepack.json`), for mountain-graph or jfr-web; with `dups`, the profile of the duplicates |
+| `--save <file>` | write the profile there too, as a Flamepack (`.fpk`), for mountain-graph or jfr-web; with `dups`, the profile of the duplicates |
 | `--dir <path>` | look for the most recent dump there, not in the current directory |
 | `--stats` | parse again and say what it cost: time, and peak memory |
 | `--color auto\|always\|never` | colour on a terminal by default; `NO_COLOR` turns it off |

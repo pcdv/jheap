@@ -101,7 +101,7 @@ Options:
   --fresh             parse again, even when a parse is kept beside the dump
   --no-keep           keep no parse beside the dump
   --oops <width>      compressed or wide references; guessed from the heap's span
-  --save <file>       write the profile there too, as a Flamepack (.flamepack.json); with
+  --save <file>       write the profile there too, as a Flamepack (.fpk); with
                       dups, the profile of the duplicates, which holds the Strings' text
   --dir <path>        look for the most recent dump there, not here
   --stats             parse again and say what it cost: time and peak memory
@@ -302,8 +302,8 @@ mod tests {
         assert_eq!(a.command, Command::Trace("store.Store".into()));
         let a = run("heap.hprof leaks --share 5");
         assert!((a.share - 0.05).abs() < 1e-12);
-        let a = run("heap.hprof dups 5 --save dups.flamepack.json");
-        assert_eq!((a.command, a.rows, a.save), (Command::Dups, Some(5), Some(PathBuf::from("dups.flamepack.json"))));
+        let a = run("heap.hprof dups 5 --save dups.fpk");
+        assert_eq!((a.command, a.rows, a.save), (Command::Dups, Some(5), Some(PathBuf::from("dups.fpk"))));
     }
 
     #[test]

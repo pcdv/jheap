@@ -139,6 +139,6 @@ pub fn run(c: &mut Ctx, l: &Loaded) -> io::Result<Found> {
          A value is shown as the dump holds it, cut at 60 characters. Held by names the innermost\n\
          class of the application on the path of each copy."))?;
     writeln!(c.out, "{}", c.style.dim(&format!(
-        "Drawn as mountains by mountain-graph, a peak a value: {}", c.suggest("dups --save dups.flamepack.json"))))?;
+        "Drawn as mountains by mountain-graph, a peak a value: {}", c.suggest("dups --save dups.fpk"))))?;
     Ok(result)
 }

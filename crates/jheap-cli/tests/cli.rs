@@ -312,9 +312,9 @@ fn dups_keeps_no_text_beside_the_dump() {
 fn dups_saves_the_profile_of_the_duplicates() {
     let d = Dir::new("dups-save");
     fs::write(d.path("strings.hprof"), strings_dump()).unwrap();
-    let o = d.jheap(&["strings.hprof", "dups", "--save", "dups.flamepack.json", "--no-keep"]);
+    let o = d.jheap(&["strings.hprof", "dups", "--save", "dups.fpk", "--no-keep"]);
     assert_eq!(code(&o), 0, "{}", stderr(&o));
-    let doc: Value = serde_json::from_str(&fs::read_to_string(d.path("dups.flamepack.json")).unwrap()).unwrap();
+    let doc: Value = serde_json::from_str(&fs::read_to_string(d.path("dups.fpk")).unwrap()).unwrap();
     assert_eq!(doc["version"], 5);
     assert_eq!(doc["duplicates"], serde_json::json!({"count": 2, "copies": 5, "bytes": 240, "saving": 144, "named": 2}));
     // the weights add up to what keeping one copy of each would save
