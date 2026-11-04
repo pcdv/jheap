@@ -58,7 +58,7 @@ behaviour was meant to do: `git -C ../heap-landscape show 75ac409:<path>`.
 4. **Done.** Build the wasm package, run it in the web app, and delete the JS
    parser and the CLI-only modules from heap-landscape. The repositories split
    for good here. The page parses with jheap in a Web Worker that reads the
-   `File` through `FileReaderSync`, and opens a `.jheap.json`. A 4.6 GB dump
+   `File` through `FileReaderSync`, and opens a kept parse (`.jheap.fpk`). A 4.6 GB dump
    opens in 18 s there, against 4 s natively: the reads through
    `FileReaderSync` are most of the difference. heap-landscape's parse tests run
    jheap's module. `hl` is gone; the user's heap-dump-analysis skill calls jheap.
@@ -75,10 +75,11 @@ reads.
   deliberate improvement (e.g. the walk's depth limit of 30, which leaves the end of
   a long chain without its root) changes the expected file in the same commit and
   says why in the message.
-- **The profile document**: jfr-web's version 4 JSON plus `samples.objects` and a
-  `heap` object (`key`, `report`), as `tools/report.mjs` writes it
-  (`profile/document.rs`). mountain-graph
-  and jfr-web read it. The parse kept beside a dump is named `<name>.jheap.json`.
+- **The profile document**: a Flamepack, version 5 (version 4 is still read), plus
+  `samples.objects` and a `heap` object (`key`, `report`), as
+  `profile/document.rs` writes it. mountain-graph and jfr-web read it. The parse
+  kept beside a dump is named `<name>.jheap.fpk`; an older `<name>.jheap.json`
+  still opens on its own.
 - **Exit codes**, which agents rely on: 0 found, 1 broke, 2 called wrong, 3 found
   nothing, 4 a traced name matches several classes.
 - **Everything else in the command's output may improve**: wording, layout, JSON
@@ -91,7 +92,7 @@ reads.
   The JS version needs about 55 bytes an object (a 4.6 GB dump of 46M objects peaks
   at 2.5 GiB, in 13 s); do better, and measure it.
 - wasm32 addresses 4 GiB: the browser handles up to roughly 100M objects. Beyond,
-  the CLI parses and the page opens its `.jheap.json`.
+  the CLI parses and the page opens its `.jheap.fpk`.
 - References' width is guessed from the heap's span (compressed under 32 GB, wide
   above), `--oops` overrides. Object sizes are aligned to 8.
 
