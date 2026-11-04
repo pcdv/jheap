@@ -76,11 +76,11 @@ fn the_summary_answers_first_and_keeps_the_parse() {
     assert!(text.contains("jheap server-after.hprof trace com.example.Registry"), "{text}");
     // plain text in a pipe
     assert!(!text.contains('\x1b'), "{text}");
-    assert!(d.path("server-after.jheap.json").exists());
+    assert!(d.path("server-after.jheap.fpk").exists());
 
     // the next command reads the kept parse
     let o = d.jheap(&["server-after.hprof", "info"]);
-    assert!(stdout(&o).contains("read from server-after.jheap.json"), "{}", stdout(&o));
+    assert!(stdout(&o).contains("read from server-after.jheap.fpk"), "{}", stdout(&o));
     // a fresh one parses again
     let o = d.jheap(&["server-after.hprof", "info", "--fresh"]);
     assert!(stdout(&o).contains("parsed in"), "{}", stdout(&o));
@@ -91,7 +91,7 @@ fn no_keep_writes_nothing_beside_the_dump() {
     let d = Dir::new("nokeep");
     let o = d.jheap(&["server-after.hprof", "peaks", "--no-keep"]);
     assert_eq!(code(&o), 0);
-    assert!(!d.path("server-after.jheap.json").exists());
+    assert!(!d.path("server-after.jheap.fpk").exists());
 }
 
 #[test]
@@ -300,7 +300,7 @@ fn dups_keeps_no_text_beside_the_dump() {
     let o = d.jheap(&["strings.hprof", "dups"]);
     assert_eq!(code(&o), 0, "{}", stderr(&o));
     // the usual parse is kept, which names classes and never a String's text
-    let kept = fs::read_to_string(d.path("strings.jheap.json")).expect("the parse is kept");
+    let kept = fs::read_to_string(d.path("strings.jheap.fpk")).expect("the parse is kept");
     assert!(!kept.contains("hello"), "{kept}");
     // and it is not read in place of the dump: the next dups still finds them
     let o = d.jheap(&["strings.hprof", "dups", "--json"]);

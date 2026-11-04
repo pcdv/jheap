@@ -11,11 +11,15 @@ pub struct Found {
     pub modified: SystemTime,
 }
 
+/// The suffixes of a kept parse: a Flamepack, and the JSON an earlier jheap
+/// kept, which still stands for its dump.
+const KEPT: [&str; 2] = [".jheap.fpk", ".jheap.json"];
+
 /// What a file is called without the suffix of a dump or a kept parse, or
 /// None for another file.
 fn stem(name: &str) -> Option<&str> {
     let lower = name.to_ascii_lowercase();
-    for suffix in [".hprof.gz", ".hprof", ".jheap.json"] {
+    for suffix in [".hprof.gz", ".hprof"].into_iter().chain(KEPT) {
         if lower.ends_with(suffix) && lower.len() > suffix.len() {
             return Some(&name[..name.len() - suffix.len()]);
         }
@@ -38,7 +42,8 @@ pub fn latest(dir: &Path, count: usize) -> Result<Vec<Found>, String> {
         }
         let name = entry.file_name().to_string_lossy().into_owned();
         let Some(stem) = stem(&name) else { continue };
-        let is_dump = !name.to_ascii_lowercase().ends_with(".jheap.json");
+        let lower = name.to_ascii_lowercase();
+        let is_dump = !KEPT.iter().any(|s| lower.ends_with(s));
         let modified = meta.modified().unwrap_or(SystemTime::UNIX_EPOCH);
         match found.iter_mut().find(|(s, _, _)| s == stem) {
             // the dump stands for its parse, and its time is the dump's: the
@@ -58,7 +63,7 @@ pub fn latest(dir: &Path, count: usize) -> Result<Vec<Found>, String> {
     if found.len() < count {
         let what = if count == 1 { "no dump".to_string() } else { format!("{} dumps of the {count} needed", found.len()) };
         return Err(format!(
-            "{what} in {}: no .hprof, .hprof.gz or .jheap.json to take. Name {}, or --dir <path> looks elsewhere",
+            "{what} in {}: no .hprof, .hprof.gz or .jheap.fpk to take. Name {}, or --dir <path> looks elsewhere",
             dir.display(),
             if count == 1 { "one" } else { "them" }
         ));
@@ -97,16 +102,19 @@ mod tests {
         touch(&dir, "old.hprof", 3000);
         // its parse, written after it, does not make it the newest
         touch(&dir, "mid.hprof.gz", 2000);
-        touch(&dir, "old.jheap.json", 10);
+        touch(&dir, "old.jheap.fpk", 10);
+        // a parse an earlier jheap kept is one candidate with its dump too
+        touch(&dir, "mid.jheap.json", 5);
         touch(&dir, "notes.txt", 0);
-        touch(&dir, "alone.jheap.json", 1000);
+        touch(&dir, "alone.jheap.fpk", 1000);
+        touch(&dir, "earlier.jheap.json", 4000);
 
         let one = latest(&dir, 1).unwrap();
-        assert_eq!(one[0].path.file_name().unwrap(), "alone.jheap.json");
-        let two = latest(&dir, 3).unwrap();
-        let names: Vec<_> = two.iter().map(|f| f.path.file_name().unwrap().to_string_lossy().into_owned()).collect();
-        assert_eq!(names, ["old.hprof", "mid.hprof.gz", "alone.jheap.json"]);
-        assert!(latest(&dir, 4).unwrap_err().contains("3 dumps of the 4 needed"));
+        assert_eq!(one[0].path.file_name().unwrap(), "alone.jheap.fpk");
+        let all = latest(&dir, 4).unwrap();
+        let names: Vec<_> = all.iter().map(|f| f.path.file_name().unwrap().to_string_lossy().into_owned()).collect();
+        assert_eq!(names, ["earlier.jheap.json", "old.hprof", "mid.hprof.gz", "alone.jheap.fpk"]);
+        assert!(latest(&dir, 5).unwrap_err().contains("4 dumps of the 5 needed"));
         fs::remove_dir_all(&dir).ok();
     }
 }

@@ -79,7 +79,7 @@ Usage: jheap [<dump>] [<command> [<args>]] [options]
        jheap diff [<earlier> <later>] [options]
 
 The dump comes first, then what to ask of it. Without a dump, the most recent
-.hprof, .hprof.gz or .jheap.json of the directory is used, and named on stderr.
+.hprof, .hprof.gz or .jheap.fpk of the directory is used, and named on stderr.
 
 Commands:
   (none)            what holds the memory, whether anything could leak, what next
@@ -109,7 +109,7 @@ Options:
   -h, --help          this
   -V, --version
 
-The parse of a dump is kept beside it as <name>.jheap.json and read in its place
+The parse of a dump is kept beside it as <name>.jheap.fpk and read in its place
 the next time, if the dump has not changed.
 
 Exit codes: 0 found something, 1 it broke, 2 called wrong, 3 found nothing,

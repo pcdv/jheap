@@ -115,7 +115,9 @@ struct DuplicatesSummary {
 }
 
 /// Where the parse of a dump is kept: beside it, named as MAT names its
-/// indexes, the dump's name without `.hprof` or `.hprof.gz`.
+/// indexes, the dump's name without `.hprof` or `.hprof.gz`, and the suffix of
+/// a Flamepack. A `.jheap.json` kept by an earlier jheap is not read: the dump
+/// is parsed again, which takes seconds, and its parse kept under the new name.
 pub fn kept_path_of(dump: &Path) -> PathBuf {
     let name = dump.file_name().map(|n| n.to_string_lossy().into_owned()).unwrap_or_default();
     let lower = name.to_ascii_lowercase();
@@ -123,7 +125,7 @@ pub fn kept_path_of(dump: &Path) -> PathBuf {
         .iter()
         .find(|s| lower.ends_with(*s))
         .map_or(name.as_str(), |s| &name[..name.len() - s.len()]);
-    dump.with_file_name(format!("{stem}.jheap.json"))
+    dump.with_file_name(format!("{stem}.jheap.fpk"))
 }
 
 fn millis(t: SystemTime) -> u64 {
@@ -255,7 +257,7 @@ fn read_kept(kept: &Path, key: &Key, dump: &Path) -> Option<Loaded> {
 /// run stopped halfway leaves no file that looks whole. A directory that
 /// cannot be written to is said, and the command goes on.
 fn keep(path: &Path, key: &Key, profile: &Profile, report: &Report) -> Option<PathBuf> {
-    let aside = path.with_extension(format!("json.{}.tmp", std::process::id()));
+    let aside = path.with_extension(format!("fpk.{}.tmp", std::process::id()));
     let document = Document::of(profile);
     let kept = Kept { document: &document, heap: KeptHeap { key, report } };
     let written = File::create(&aside)
@@ -428,8 +430,8 @@ mod tests {
 
     #[test]
     fn kept_beside_the_dump_without_its_suffix() {
-        assert_eq!(kept_path_of(Path::new("d/heap.hprof")), Path::new("d/heap.jheap.json"));
-        assert_eq!(kept_path_of(Path::new("d/heap.HPROF.gz")), Path::new("d/heap.jheap.json"));
-        assert_eq!(kept_path_of(Path::new("heap.bin")), Path::new("heap.bin.jheap.json"));
+        assert_eq!(kept_path_of(Path::new("d/heap.hprof")), Path::new("d/heap.jheap.fpk"));
+        assert_eq!(kept_path_of(Path::new("d/heap.HPROF.gz")), Path::new("d/heap.jheap.fpk"));
+        assert_eq!(kept_path_of(Path::new("heap.bin")), Path::new("heap.bin.jheap.fpk"));
     }
 }

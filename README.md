@@ -42,7 +42,7 @@ Without a command, jheap answers in one screen:
 ```
 $ jheap server-after.hprof
 server-after.hprof: 618.7 KiB in 949 objects, 2.1% unreachable
-parsed in 3 ms, kept as server-after.jheap.json
+parsed in 3 ms, kept as server-after.jheap.fpk
 
 Where the memory is
 1. 525.4 KiB    85%  byte[] ← com.example.Session
@@ -149,21 +149,25 @@ unzipped to a temporary file first, as the parser seeks. Which kind a file is
 comes from its content, not its name.
 
 The first command on a dump keeps its parse beside it, as MAT keeps its indexes:
-`heap.hprof` or `heap.hprof.gz` gets `heap.jheap.json`, a few MB whatever the
+`heap.hprof` or `heap.hprof.gz` gets `heap.jheap.fpk`, a few MB whatever the
 size of the dump. The next command reads that instead, while the dump has not
 changed (its name, size and time), `--oops` is the same and jheap is the same
 version. `--fresh` parses again anyway; `--no-keep` keeps nothing, for a dump on a
 share that is not yours to write to. Where the directory cannot be written, jheap
 says so and goes on.
 
-The kept parse is a [Flamepack](https://github.com/pcdv/flamepack) (version 4), the
-profile format of [jfr-web](https://github.com/pcdv/jfr-web), with a column of object
-counts and the parse's report as an extra `heap` member: mountain-graph
-opens it as it opens the dump, and so does every command here.
+The kept parse is a [Flamepack](https://github.com/pcdv/flamepack) (version 5;
+version 4 is still read), the profile format of [jfr-web](https://github.com/pcdv/jfr-web),
+with a column of object counts and the parse's report as an extra `heap` member:
+mountain-graph opens it as it opens the dump, and so does every command here.
+
+Earlier versions kept it as `heap.jheap.json`. That file is no longer read in place
+of its dump, which is parsed again and its parse kept under the new name; on its
+own, it still opens as a profile.
 
 ### Leaving the dump out
 
-Without a dump, jheap takes the most recent `.hprof`, `.hprof.gz` or `.jheap.json`
+Without a dump, jheap takes the most recent `.hprof`, `.hprof.gz` or `.jheap.fpk`
 of the current directory (not its subdirectories) and says which on stderr, so that
 a wrong guess is seen, not silent:
 
@@ -179,8 +183,9 @@ so it cannot change what a command that names its dump does. The rules:
 
 - A first argument that is a command (`leaks`, `diff`, …) is a command, not a
   file: a dump of that name is passed as `./leaks`.
-- A `.jheap.json` counts as the dump it was kept for, so a dump and its parse
-  are one candidate, not two. The newest by modification time wins.
+- A `.jheap.fpk` (or an earlier `.jheap.json`) counts as the dump it was kept for,
+  so a dump and its parse are one candidate, not two. The newest by modification
+  time wins.
 - `--dir <path>` looks elsewhere than the current directory.
 - Nothing found, or `diff` with fewer than two dumps, is exit code 2 and a line
   saying where it looked. It never falls back to a file in another directory.
